@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.Odbc;
 using System.Linq;
@@ -118,18 +118,20 @@ namespace iRacingSdkWrapper
         /// Gets the value of the result of the current YamlQuery. May throw an exception if the query is invalid or does not return data.
         /// Use GetValue method to prevent exceptions.
         /// </summary>
+        [System.Diagnostics.DebuggerHidden]
         public string Value
         {
             get
             {
                 if (this.IsError)
                 {
-                    throw new YamlQueryException(this.ErrorMessage);
+                    return null;
+                    //throw new YamlQueryException(this.ErrorMessage);
                 }
 
                 var value = this.GetValueSafe();
-                if (value == null)
-                    throw new YamlQueryException("The YAML path returned null: " + this.QueryPath);
+                //if (value == null)
+                //    throw new YamlQueryException("The YAML path returned null: " + this.QueryPath);
 
                 return value; 
             }
@@ -141,14 +143,7 @@ namespace iRacingSdkWrapper
         /// <param name="defaultValue">The default value to return in case the query is invalid or does not return data.</param>
         public string GetValue(string defaultValue = null)
         {
-            try
-            {
-                return this.Value;
-            }
-            catch (Exception ex)
-            {
-                return defaultValue;
-            }
+            return this.Value;
         }
         
         /// <summary>

@@ -36,6 +36,7 @@ namespace iRacingSdkWrapper.Broadcast
         /// </summary>
         public void Activate()
         {
+            Clear(); //We don't know if user is already in chat-mode in iRacing, so cancel it before we activate it
             Broadcast(BroadcastMessageTypes.ChatCommand, (int)ChatCommandModeTypes.BeginChat, 0);
         }
 

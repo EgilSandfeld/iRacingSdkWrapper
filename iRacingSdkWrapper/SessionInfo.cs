@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows;
 using iRSDKSharp;
 using YamlDotNet.RepresentationModel;
 
@@ -19,8 +16,7 @@ namespace iRacingSdkWrapper
         {
             _updateTime = updateTime;
 
-            _rawYaml = yaml;
-
+            //_yaml = yaml;
             this.FixYaml(yaml);
             this.ParseYaml();
         }
@@ -35,15 +31,9 @@ namespace iRacingSdkWrapper
 
         private string _yaml;
         /// <summary>
-        /// The YAML string representing the session info, modified to ensure correct parsing.
+        /// The raw YAML string representing the session info.
         /// </summary>
         public string Yaml { get { return _yaml; } }
-
-        private string _rawYaml;
-        /// <summary>
-        /// The raw YAML string as originally returned from the sim.
-        /// </summary>
-        public string RawYaml { get { return _rawYaml;} }
 
         private bool _isValidYaml;
         public bool IsValidYaml { get { return _isValidYaml; } }
@@ -111,7 +101,7 @@ namespace iRacingSdkWrapper
                 }
                 _isValidYaml = true;
             }
-            catch (Exception ex)
+            catch// (Exception ex)
             {
                 _isValidYaml = false;
             }

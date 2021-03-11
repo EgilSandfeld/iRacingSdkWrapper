@@ -26,6 +26,8 @@ namespace iRacingSdkWrapper
                                     this.SessionState,
                                     this.SessionUniqueID,
                                     this.SessionFlags,
+                                    this.CarLeftRights,
+                                    this.PitServiceFlags,
                                     this.DriverMarker,
                                     this.IsReplayPlaying,
                                     this.ReplayFrameNum,
@@ -173,9 +175,27 @@ namespace iRacingSdkWrapper
 
 
         /// <summary>
+        /// Pit service flags. Unit: irsdk_PitSvFlags
+        /// </summary>
+        public TelemetryValue<PitServiceFlag> PitServiceFlags { get { return new TelemetryValue<PitServiceFlag>(sdk, "PitSvFlags"); } }
+
+
+        /// <summary>
+        /// Pit service status flags. Unit: irsdk_PitSvStatus
+        /// </summary>
+        public TelemetryValue<PitSvStatuses> PitSvStatuses { get { return new TelemetryValue<PitSvStatuses>(sdk, "PlayerCarPitSvStatus"); } }
+
+
+        /// <summary>
         /// Session flags. Unit: irsdk_Flags
         /// </summary>
         public TelemetryValue<SessionFlag> SessionFlags { get { return new TelemetryValue<SessionFlag>(sdk, "SessionFlags"); } }
+
+
+        /// <summary>
+        /// Car Left Right. Unit: irsdk_CarLeftRight
+        /// </summary>
+        public TelemetryValue<CarLeftRights> CarLeftRights { get { return new TelemetryValue<CarLeftRights>(sdk, "CarLeftRight"); } }
 
 
         /// <summary>

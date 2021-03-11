@@ -5,7 +5,7 @@ using System.Text;
 
 namespace iRacingSdkWrapper.Bitfields
 {
-    class PitServiceFlag : BitfieldBase<PitServiceFlags>
+    public class PitServiceFlag : BitfieldBase<PitServiceFlags>
     {
         public PitServiceFlag() : this(0) { }
 

@@ -5,13 +5,14 @@ using System.Threading;
 using System.Windows.Threading;
 using iRSDKSharp;
 using iRacingSdkWrapper.Broadcast;
+using System.Threading.Tasks;
 
 namespace iRacingSdkWrapper
 {
     /// <summary>
     /// Provides a useful wrapper of the iRacing SDK.
     /// </summary>
-    public sealed class SdkWrapper
+    public sealed class SdkWrapper : IDisposable
     {
         #region Fields
 
@@ -19,9 +20,7 @@ namespace iRacingSdkWrapper
         private readonly SynchronizationContext context;
         private int waitTime;
         private Mutex readMutex;
-
-        private Thread _looper;
-        private bool _hasConnected;
+        private CancellationTokenSource runCT;
 
         #endregion
 
@@ -61,11 +60,11 @@ namespace iRacingSdkWrapper
         /// </summary>
         public EventRaiseTypes EventRaiseType { get; set; }
 
-        private bool _IsRunning;
+        //private bool _IsRunning;
         /// <summary>
         /// Is the main loop running?
         /// </summary>
-        public bool IsRunning { get { return _IsRunning; } }
+        public bool IsRunning => runCT != null;
 
         private bool _IsConnected;
         /// <summary>
@@ -88,8 +87,8 @@ namespace iRacingSdkWrapper
                     throw new ArgumentOutOfRangeException("TelemetryUpdateFrequency cannot be more than 60.");
 
                 _TelemetryUpdateFrequency = value;
-                
-                waitTime = (int) Math.Floor(1000f/value) - 1;
+
+                waitTime = (int)Math.Floor(1000f / value) - 1;
             }
         }
 
@@ -151,15 +150,11 @@ namespace iRacingSdkWrapper
         /// </summary>
         public void Start()
         {
-            _IsRunning = true;
+            Stop();
 
-            if (_looper != null)
-            {
-                _looper.Abort();
-            }
-
-            _looper = new Thread(Loop);
-            _looper.Start();
+            // Create new cancellation token and run the looper
+            runCT = new CancellationTokenSource();
+            Task.Run(() => Loop(runCT.Token), runCT.Token);
         }
 
         /// <summary>
@@ -167,7 +162,12 @@ namespace iRacingSdkWrapper
         /// </summary>
         public void Stop()
         {
-            _IsRunning = false;
+            if (!IsRunning)
+                return;
+
+            runCT.Cancel(true);
+            WaitHandle.WaitAny(new[] { runCT.Token.WaitHandle });
+            runCT = null;
         }
 
         /// <summary>
@@ -196,12 +196,19 @@ namespace iRacingSdkWrapper
         /// </summary>
         public void RequestSessionInfoUpdate()
         {
-            var sessionInfo = sdk.GetSessionInfo();
-            var time = (double) sdk.GetData("SessionTime");
-            var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
-            this.RaiseEvent(OnSessionInfoUpdated, sessionArgs);
+            try
+            {
+                var sessionInfo = sdk.GetSessionInfo();
+                var time = (double)sdk.GetData("SessionTime");
+                var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
+                RaiseEvent(OnSessionInfoUpdated, sessionArgs);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message + " " + ex.StackTrace);
+            }
         }
-        
+
         private object TryGetSessionNum()
         {
             try
@@ -215,11 +222,12 @@ namespace iRacingSdkWrapper
             }
         }
 
-        private void Loop()
+        private void Loop(CancellationToken ct)
         {
             int lastUpdate = -1;
+            bool _hasConnected = false;
 
-            while (_IsRunning)
+            while (!ct.IsCancellationRequested)
             {
                 // Check if we can find the sim
                 if (sdk.IsConnected())
@@ -227,7 +235,7 @@ namespace iRacingSdkWrapper
                     if (!_IsConnected)
                     {
                         // If this is the first time, raise the Connected event
-                        this.RaiseEvent(OnConnected, EventArgs.Empty);
+                        RaiseEvent(OnConnected, EventArgs.Empty);
                     }
 
                     _hasConnected = true;
@@ -235,57 +243,43 @@ namespace iRacingSdkWrapper
 
                     readMutex.WaitOne(8);
 
-                    int attempts = 0;
-                    const int maxAttempts = 99;
-
-                    object sessionnum = this.TryGetSessionNum();
-                    while (sessionnum == null && attempts <= maxAttempts)
-                    {
-                        attempts++;
-                        sessionnum = this.TryGetSessionNum();
-                    }
-                    if (attempts >= maxAttempts)
-                    {
-                        Debug.WriteLine("Session num too many attempts");
-                        continue;
-                    }
-                    
                     // Parse out your own driver Id
-                    if (this.DriverId == -1)
-                    {
+                    if (_DriverId == -1)
                         _DriverId = (int)sdk.GetData("PlayerCarIdx");
-                    }
 
                     // Get the session time (in seconds) of this update
-                    var time = (double) sdk.GetData("SessionTime");
+                    var time = (double)sdk.GetData("SessionTime");
 
                     // Raise the TelemetryUpdated event and pass along the lap info and session time
                     var telArgs = new TelemetryUpdatedEventArgs(new TelemetryInfo(sdk), time);
-                    this.RaiseEvent(OnTelemetryUpdated, telArgs);
+                    RaiseEvent(OnTelemetryUpdated, telArgs);
 
                     // Is the session info updated?
                     int newUpdate = sdk.Header.SessionInfoUpdate;
+
                     if (newUpdate != lastUpdate)
                     {
                         lastUpdate = newUpdate;
+
+                        //Force check Player Car Id again, to be sure when crossing from warm up practice -> race server practice, that the ID updates.
+                        //This is required since iRacing is not shut down inbetween session changes, thus never gets to set DriverId to -1
+                        if (_DriverId != -1 && _DriverId != (int)sdk.GetData("PlayerCarIdx"))
+                            _DriverId = (int)sdk.GetData("PlayerCarIdx");
 
                         // Get the session info string
                         var sessionInfo = sdk.GetSessionInfo();
 
                         // Raise the SessionInfoUpdated event and pass along the session info and session time.
                         var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
-                        this.RaiseEvent(OnSessionInfoUpdated, sessionArgs);
+                        RaiseEvent(OnSessionInfoUpdated, sessionArgs);
                     }
-
-
                 }
                 else if (_hasConnected)
                 {
                     // We have already been initialized before, so the sim is closing
-                    this.RaiseEvent(OnDisconnected, EventArgs.Empty);
+                    RaiseEvent(OnDisconnected, EventArgs.Empty);
 
                     sdk.Shutdown();
-                    _DriverId = -1;
                     lastUpdate = -1;
                     _IsConnected = false;
                     _hasConnected = false;
@@ -294,7 +288,6 @@ namespace iRacingSdkWrapper
                 {
                     _IsConnected = false;
                     _hasConnected = false;
-                    _DriverId = -1;
 
                     //Try to find the sim
                     sdk.Startup();
@@ -312,9 +305,8 @@ namespace iRacingSdkWrapper
                     Thread.Sleep(ConnectSleepTime);
                 }
             }
-        
+
             sdk.Shutdown();
-            _DriverId = -1;
             _IsConnected = false;
         }
 
@@ -382,6 +374,11 @@ namespace iRacingSdkWrapper
         {
             var handler = this.Disconnected;
             if (handler != null) handler(this, e);
+        }
+
+        public void Dispose()
+        {
+            runCT?.Cancel();
         }
 
         #endregion

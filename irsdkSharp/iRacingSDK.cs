@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -56,7 +56,7 @@ namespace iRSDKSharp
         public const int VarDescOffset = 48;
         public const int VarUnitOffset = 112;
         public int VarHeaderSize = 144;
-
+        private Encoding encoder;
 
         public bool IsInitialized = false;
 
@@ -67,20 +67,29 @@ namespace iRSDKSharp
         public Dictionary<string, CVarHeader> VarHeaders = new Dictionary<string, CVarHeader>();
         //List<CVarHeader> VarHeaders = new List<CVarHeader>();
 
+        public iRacingSDK()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            encoder = Encoding.GetEncoding(1252);
+        }
+
         public bool Startup()
         {
-            if (IsInitialized) return true;
+            if (IsInitialized) 
+                return true;
 
             try
             {
                 iRacingFile = MemoryMappedFile.OpenExisting(Defines.MemMapFileName);
                 FileMapView = iRacingFile.CreateViewAccessor();
-                
+
                 VarHeaderSize = Marshal.SizeOf(typeof(VarHeader));
 
                 var hEvent = OpenEvent(Defines.DesiredAccess, false, Defines.DataValidEventName);
                 var are = new AutoResetEvent(false);
+#pragma warning disable CS0618 // Type or member is obsolete
                 are.Handle = hEvent;
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 var wh = new WaitHandle[1];
                 wh[0] = are;
@@ -113,16 +122,16 @@ namespace iRSDKSharp
                 FileMapView.ReadArray<byte>(Header.VarHeaderOffset + ((i * VarHeaderSize) + VarNameOffset), name, 0, Defines.MaxString);
                 FileMapView.ReadArray<byte>(Header.VarHeaderOffset + ((i * VarHeaderSize) + VarDescOffset), desc, 0, Defines.MaxDesc);
                 FileMapView.ReadArray<byte>(Header.VarHeaderOffset + ((i * VarHeaderSize) + VarUnitOffset), unit, 0, Defines.MaxString);
-                string nameStr = System.Text.Encoding.Default.GetString(name).TrimEnd(new char[] { '\0' });
-                string descStr = System.Text.Encoding.Default.GetString(desc).TrimEnd(new char[] { '\0' });
-                string unitStr = System.Text.Encoding.Default.GetString(unit).TrimEnd(new char[] { '\0' });
+                string nameStr = encoder.GetString(name).TrimEnd(new char[] { '\0' });
+                string descStr = encoder.GetString(desc).TrimEnd(new char[] { '\0' });
+                string unitStr = encoder.GetString(unit).TrimEnd(new char[] { '\0' });
                 VarHeaders[nameStr] = new CVarHeader(type, offset, count, nameStr, descStr, unitStr);
             }
         }
 
         public object GetData(string name)
         {
-            if(IsInitialized && Header != null)
+            if (IsInitialized && Header != null)
             {
                 if (VarHeaders.ContainsKey(name))
                 {
@@ -132,7 +141,7 @@ namespace iRSDKSharp
                     {
                         byte[] data = new byte[count];
                         FileMapView.ReadArray<byte>(Header.Buffer + varOffset, data, 0, count);
-                        return System.Text.Encoding.Default.GetString(data).TrimEnd(new char[] { '\0' });
+                        return encoder.GetString(data).TrimEnd(new char[] { '\0' });
                     }
                     else if (VarHeaders[name].Type == CVarHeader.VarType.irBool)
                     {
@@ -193,11 +202,11 @@ namespace iRSDKSharp
 
         public string GetSessionInfo()
         {
-            if(IsInitialized && Header != null)
+            if (IsInitialized && Header != null)
             {
                 byte[] data = new byte[Header.SessionInfoLength];
                 FileMapView.ReadArray<byte>(Header.SessionInfoOffset, data, 0, Header.SessionInfoLength);
-                return System.Text.Encoding.Default.GetString(data).TrimEnd(new char[] { '\0' });
+                return encoder.GetString(data).TrimEnd(new char[] { '\0' });
             }
             return null;
         }
@@ -215,8 +224,6 @@ namespace iRSDKSharp
         {
             IsInitialized = false;
             Header = null;
-            //FileMapView.Dispose();
-            //iRacingFile.Dispose();
         }
 
         IntPtr GetBroadcastMessageID()
@@ -257,7 +264,7 @@ namespace iRSDKSharp
 
         [DllImport("Kernel32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr OpenEvent(UInt32 dwDesiredAccess, Boolean bInheritHandle, String lpName);
-        
+
         public int MakeLong(short lowPart, short highPart)
         {
             return (int)(((ushort)lowPart) | (uint)(highPart << 16));
@@ -324,7 +331,7 @@ namespace iRSDKSharp
         //8 bytes: offset = 24
         public int numVars;
         public int varHeaderOffset;
-        
+
         //16 bytes: offset = 32
         public int numBuf;
         public int bufLen;
