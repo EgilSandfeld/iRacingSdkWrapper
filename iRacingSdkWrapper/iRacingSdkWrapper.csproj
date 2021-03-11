@@ -76,10 +76,6 @@
     <None Include="telemetry_11_23_15.pdf" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DRE.Logger\DRE.Logger.csproj">
-      <Project>{a8ca0894-1233-4585-8bad-e8b22f0f197c}</Project>
-      <Name>DRE.Logger</Name>
-    </ProjectReference>
     <ProjectReference Include="..\irsdkSharp\iRSDKSharp.csproj">
       <Project>{72631b85-eb9a-473e-9b4c-65b355a9000d}</Project>
       <Name>iRSDKSharp</Name>
@@ -87,7 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="YamlDotNet">
-      <Version>8.1.0</Version>
+      <Version>9.1.4</Version>
     </PackageReference>
     <PackageReference Include="YamlDotNet.Core">
       <Version>2.2.0</Version>
