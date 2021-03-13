@@ -143,7 +143,7 @@ namespace iRacingSdkWrapper
         /// <param name="defaultValue">The default value to return in case the query is invalid or does not return data.</param>
         public string GetValue(string defaultValue = null)
         {
-            return this.Value;
+            return this.Value ?? defaultValue;
         }
         
         /// <summary>
