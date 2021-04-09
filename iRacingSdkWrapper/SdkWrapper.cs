@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows.Threading;
 using iRSDKSharp;
@@ -448,5 +452,101 @@ namespace iRacingSdkWrapper
         }
 
         #endregion
+
+        public string GetTelemetryAsCSV(int playerIdx)
+        {
+            if (Sdk == null)
+                return "";
+
+            StringBuilder csvContent = new StringBuilder();
+
+            string zeroTo63 = "";
+            for (int i = 0; i < 64; i++)
+                zeroTo63 += "," + i;
+
+            csvContent.AppendLine("Variable,PlayerValue" + zeroTo63);
+
+            foreach (var header in Sdk.VarHeaders)
+            {
+                try
+                {
+                    switch (header.Value.Type)
+                    {
+                        case CVarHeader.VarType.irChar:
+                            ExtractVar<string>(playerIdx, header, csvContent);
+                            break;
+                        case CVarHeader.VarType.irBool:
+                            ExtractVar<bool>(playerIdx, header, csvContent);
+                            break;
+                        case CVarHeader.VarType.irInt:
+                            ExtractVar<int>(playerIdx, header, csvContent);
+                            break;
+                        case CVarHeader.VarType.irBitField:
+                            ExtractVar<int>(playerIdx, header, csvContent);
+                            break;
+                        case CVarHeader.VarType.irFloat:
+                            if (header.Value.Count > 1)
+                            {
+                                if (header.Value.Count >= playerIdx)
+                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + "," + string.Join(",", GetTelemetryValue<float[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
+                                else
+                                {
+                                    for (int i = 0; i < header.Value.Count; i++)
+                                        csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, i).ToString(CultureInfo.InvariantCulture));
+                                }
+                            }
+                            else
+                                csvContent.AppendLine(ExtractHeaderKeyAndValue<float>(header).ToString(CultureInfo.InvariantCulture));
+                            break;
+                        case CVarHeader.VarType.irDouble:
+                            if (header.Value.Count > 1)
+                            {
+                                if (header.Value.Count >= playerIdx)
+                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + "," + string.Join(",", GetTelemetryValue<double[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
+                                else
+                                {
+                                    for (int i = 0; i < header.Value.Count; i++)
+                                        csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, i).ToString(CultureInfo.InvariantCulture));
+                                }
+                            }
+                            else
+                                csvContent.AppendLine(ExtractHeaderKeyAndValue<double>(header).ToString(CultureInfo.InvariantCulture));
+                            break;
+                    }
+                }
+                catch
+                {
+                    csvContent.AppendLine(header.Key + ",null!!");
+                }
+            }
+
+            return csvContent.ToString();
+        }
+
+        private void ExtractVar<T>(int playerIdx, KeyValuePair<string, CVarHeader> header, StringBuilder csvContent)
+        {
+            if (header.Value.Count > 1)
+            {
+                if (header.Value.Count >= playerIdx)
+                    csvContent.AppendLine(ExtractHeaderKeyValuePair<T>(header, playerIdx) + "," + string.Join(",", GetTelemetryValue<T[]>(header.Value.Name).Value));
+                else
+                {
+                    for (int i = 0; i < header.Value.Count; i++)
+                        csvContent.AppendLine(ExtractHeaderKeyValuePair<T>(header, i));
+                }
+            }
+            else
+                csvContent.AppendLine(ExtractHeaderKeyAndValue<T>(header));
+        }
+
+        private string ExtractHeaderKeyAndValue<T>(KeyValuePair<string, CVarHeader> header)
+        {
+            return header.Key + "," + GetTelemetryValue<T>(header.Value.Name).Value;
+        }
+
+        private string ExtractHeaderKeyValuePair<T>(KeyValuePair<string, CVarHeader> header, int i)
+        {
+            return header.Key + "_" + i + "," + GetTelemetryValue<T[]>(header.Value.Name).Value[i];
+        }
     }
 }
