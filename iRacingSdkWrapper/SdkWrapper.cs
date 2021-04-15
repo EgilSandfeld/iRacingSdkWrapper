@@ -466,6 +466,7 @@ namespace iRacingSdkWrapper
 
             csvContent.AppendLine("Variable,PlayerValue" + zeroTo63);
 
+
             foreach (var header in Sdk.VarHeaders)
             {
                 try
