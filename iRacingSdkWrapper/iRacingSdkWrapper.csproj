@@ -38,7 +38,6 @@
     </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -91,7 +90,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>cd $(TargetDir)
+    <PostBuildEvent Condition="'$(OS)' == 'Windows NT' ">cd $(TargetDir)
 del *.xml
 del YamlDotNet.Core.pdb</PostBuildEvent>
   </PropertyGroup>
