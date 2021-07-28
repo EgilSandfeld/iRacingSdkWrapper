@@ -16,7 +16,7 @@ namespace iRacingSdkWrapper
     /// <summary>
     /// Provides a useful wrapper of the iRacing SDK.
     /// </summary>
-    public sealed class SdkWrapper : IDisposable
+    public sealed class SdkWrapper : IDisposable, ISimProvider
     {
         #region Fields
 

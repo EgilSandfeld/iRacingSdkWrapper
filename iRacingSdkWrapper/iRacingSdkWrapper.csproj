@@ -61,6 +61,7 @@
     <Compile Include="Broadcast\TextureControl.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Bitfields\SessionFlag.cs" />
+    <Compile Include="ISimProvider.cs" />
     <Compile Include="SessionInfo.cs" />
     <Compile Include="TelemetryValue.cs" />
     <Compile Include="TelemetryInfo.cs" />
