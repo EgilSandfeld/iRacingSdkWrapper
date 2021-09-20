@@ -104,6 +104,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Serilog">
+      <Version>2.10.1-dev-01343</Version>
+    </PackageReference>
     <PackageReference Include="YamlDotNet">
       <Version>9.1.4</Version>
     </PackageReference>

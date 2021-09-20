@@ -25,6 +25,7 @@ namespace iRacingSdkWrapper
         private int waitTime;
         private Mutex readMutex;
         private CancellationTokenSource runCT;
+        private Action<string> _logger;
 
         #endregion
 
@@ -152,13 +153,16 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Connects to iRacing and starts the main loop in a background thread.
         /// </summary>
-        public void Start()
+        public void Start(Action<string> logger)
         {
+            _logger = logger;
             Stop();
 
             // Create new cancellation token and run the looper
             runCT = new CancellationTokenSource();
             Task.Run(() => Loop(runCT.Token), runCT.Token);
+
+            _logger?.Invoke($"StartWrapper wrapper started at {DateTime.UtcNow:HH-mm-ss}");
         }
 
         /// <summary>
@@ -172,6 +176,11 @@ namespace iRacingSdkWrapper
             runCT.Cancel(true);
             WaitHandle.WaitAny(new[] { runCT.Token.WaitHandle });
             runCT = null;
+        }
+
+        public void StopLogging()
+        {
+            _logger = null;
         }
 
         /// <summary>
@@ -240,6 +249,7 @@ namespace iRacingSdkWrapper
                     {
                         // If this is the first time, raise the Connected event
                         RaiseEvent(OnConnected, EventArgs.Empty);
+                        _logger?.Invoke($"iRacing Wrapper found iRacing at {DateTime.UtcNow:HH-mm-ss}");
                     }
 
                     _hasConnected = true;
@@ -249,7 +259,10 @@ namespace iRacingSdkWrapper
 
                     // Parse out your own driver Id
                     if (_DriverId == -1)
+                    {
                         _DriverId = (int)sdk.GetData("PlayerCarIdx");
+                        _logger?.Invoke($"iRacing Wrapper found player car id {_DriverId} at {DateTime.UtcNow:HH-mm-ss}");
+                    }
 
                     // Get the session time (in seconds) of this update
                     var time = (double)sdk.GetData("SessionTime");
@@ -268,7 +281,10 @@ namespace iRacingSdkWrapper
                         //Force check Player Car Id again, to be sure when crossing from warm up practice -> race server practice, that the ID updates.
                         //This is required since iRacing is not shut down inbetween session changes, thus never gets to set DriverId to -1
                         if (_DriverId != -1 && _DriverId != (int)sdk.GetData("PlayerCarIdx"))
+                        {
                             _DriverId = (int)sdk.GetData("PlayerCarIdx");
+                            _logger?.Invoke($"iRacing Wrapper found updated player car id {_DriverId} at {DateTime.UtcNow:HH-mm-ss}");
+                        }
 
                         // Get the session info string
                         var sessionInfo = sdk.GetSessionInfo();
@@ -287,6 +303,7 @@ namespace iRacingSdkWrapper
                     lastUpdate = -1;
                     _IsConnected = false;
                     _hasConnected = false;
+                    _logger?.Invoke($"iRacing Wrapper shut down at {DateTime.UtcNow:HH-mm-ss}");
                 }
                 else
                 {
@@ -295,16 +312,20 @@ namespace iRacingSdkWrapper
 
                     //Try to find the sim
                     sdk.Startup();
+                    _logger?.Invoke($"iRacing Wrapper SDK startup at {DateTime.UtcNow:HH-mm-ss}");
                 }
 
                 // Sleep for a short amount of time until the next update is available
                 if (_IsConnected)
                 {
-                    if (waitTime <= 0 || waitTime > 1000) waitTime = 15;
+                    if (waitTime <= 0 || waitTime > 1000) 
+                        waitTime = 15;
+                    
                     Thread.Sleep(waitTime);
                 }
                 else
                 {
+                    _logger?.Invoke($"iRacing Wrapper sleeping at {DateTime.UtcNow:HH-mm-ss}");
                     // Not connected yet, no need to check every 16 ms, let's try again in some time
                     Thread.Sleep(ConnectSleepTime);
                 }
@@ -312,6 +333,8 @@ namespace iRacingSdkWrapper
 
             sdk.Shutdown();
             _IsConnected = false;
+            
+            _logger?.Invoke($"iRacing Wrapper connection cancelled at {DateTime.UtcNow:HH-mm-ss}");
         }
 
         #endregion
