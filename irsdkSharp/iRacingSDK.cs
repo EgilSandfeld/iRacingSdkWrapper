@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO.MemoryMappedFiles;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
 
 namespace iRSDKSharp
 {
@@ -74,25 +75,21 @@ namespace iRSDKSharp
 
         public bool Startup()
         {
-            if (IsInitialized) 
+            if (IsInitialized)
                 return true;
-
+            
             try
             {
                 iRacingFile = MemoryMappedFile.OpenExisting(Defines.MemMapFileName);
                 FileMapView = iRacingFile.CreateViewAccessor();
-
                 VarHeaderSize = Marshal.SizeOf(typeof(VarHeader));
 
                 var hEvent = OpenEvent(Defines.DesiredAccess, false, Defines.DataValidEventName);
                 var are = new AutoResetEvent(false);
-#pragma warning disable CS0618 // Type or member is obsolete
-                are.Handle = hEvent;
-#pragma warning restore CS0618 // Type or member is obsolete
+                are.SafeWaitHandle = new SafeWaitHandle(hEvent, true);
 
                 var wh = new WaitHandle[1];
                 wh[0] = are;
-
                 WaitHandle.WaitAny(wh);
 
                 Header = new CiRSDKHeader(FileMapView);
@@ -213,9 +210,8 @@ namespace iRSDKSharp
         public bool IsConnected()
         {
             if (IsInitialized && Header != null)
-            {
                 return (Header.Status & 1) > 0;
-            }
+            
             return false;
         }
 
