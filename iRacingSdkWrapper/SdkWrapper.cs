@@ -108,6 +108,8 @@ namespace iRacingSdkWrapper
         }
 
         private int _DriverId;
+        private bool loggedFirst;
+
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
         /// </summary>
@@ -321,9 +323,15 @@ namespace iRacingSdkWrapper
                         hasConnected = false;
 
                         //Try to find the sim
-                        _logger?.Invoke($"iRacing SDK Wrapper SDK startup at {DateTime.UtcNow:HH-mm-ss}");
+                        if (!loggedFirst)
+                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup at {DateTime.UtcNow:HH-mm-ss}");
+                        
                         var result = sdk.Startup();
-                        _logger?.Invoke($"iRacing SDK Wrapper SDK startup {result} at {DateTime.UtcNow:HH-mm-ss}");
+                        
+                        if (!loggedFirst || result)
+                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup {result} at {DateTime.UtcNow:HH-mm-ss}");
+
+                        loggedFirst = true;
                     }
 
                     // Sleep for a short amount of time until the next update is available
