@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO.MemoryMappedFiles;
@@ -196,6 +197,7 @@ namespace iRSDKSharp
             return null;
         }
 
+        [SuppressMessage("ReSharper.DPA", "DPA0003: Excessive memory allocations in LOH", MessageId = "type: System.Byte[]; size: 102MB")]
         public string GetSessionInfo()
         {
             if (IsInitialized && Header != null)
