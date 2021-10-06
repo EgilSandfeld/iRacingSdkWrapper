@@ -43,7 +43,7 @@ namespace iRacingSdkWrapper
 
             this.TelemetryUpdateFrequency = 60;
             this.ConnectSleepTime = 1000;
-            _DriverId = -1;
+            _driverId = -1;
 
             this.Replay = new ReplayControl(this);
             this.Camera = new CameraControl(this);
@@ -107,13 +107,13 @@ namespace iRacingSdkWrapper
             get; set;
         }
 
-        private int _DriverId;
-        private bool loggedFirst;
+        private int _driverId;
+        private bool _loggedFirst;
 
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
         /// </summary>
-        public int DriverId { get { return _DriverId; } }
+        public int DriverId { get { return _driverId; } }
 
         #region Broadcast messages
 
@@ -270,10 +270,10 @@ namespace iRacingSdkWrapper
                         readMutex.WaitOne(8);
 
                         // Parse out your own driver Id
-                        if (_DriverId == -1)
+                        if (_driverId == -1)
                         {
-                            _DriverId = (int)sdk.GetData("PlayerCarIdx");
-                            _logger?.Invoke($"iRacing SDK Wrapper found player car id {_DriverId} at {DateTime.UtcNow:HH-mm-ss}");
+                            _driverId = (int)sdk.GetData("PlayerCarIdx");
+                            _logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId} at {DateTime.UtcNow:HH-mm-ss}");
                         }
 
                         // Get the session time (in seconds) of this update
@@ -292,10 +292,10 @@ namespace iRacingSdkWrapper
 
                             //Force check Player Car Id again, to be sure when crossing from warm up practice -> race server practice, that the ID updates.
                             //This is required since iRacing is not shut down inbetween session changes, thus never gets to set DriverId to -1
-                            if (_DriverId != -1 && _DriverId != (int)sdk.GetData("PlayerCarIdx"))
+                            if (_driverId != -1 && _driverId != (int)sdk.GetData("PlayerCarIdx"))
                             {
-                                _DriverId = (int)sdk.GetData("PlayerCarIdx");
-                                _logger?.Invoke($"iRacing SDK Wrapper found updated player car id {_DriverId} at {DateTime.UtcNow:HH-mm-ss}");
+                                _driverId = (int)sdk.GetData("PlayerCarIdx");
+                                _logger?.Invoke($"iRacing SDK Wrapper found updated player car id {_driverId} at {DateTime.UtcNow:HH-mm-ss}");
                             }
 
                             // Get the session info string
@@ -323,15 +323,15 @@ namespace iRacingSdkWrapper
                         hasConnected = false;
 
                         //Try to find the sim
-                        if (!loggedFirst)
+                        if (!_loggedFirst)
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup at {DateTime.UtcNow:HH-mm-ss}");
                         
                         var result = sdk.Startup();
                         
-                        if (!loggedFirst || result)
+                        if (!_loggedFirst || result)
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup {result} at {DateTime.UtcNow:HH-mm-ss}");
 
-                        loggedFirst = true;
+                        _loggedFirst = true;
                     }
 
                     // Sleep for a short amount of time until the next update is available
@@ -526,9 +526,9 @@ namespace iRacingSdkWrapper
 
             string zeroTo63 = "";
             for (int i = 0; i < 64; i++)
-                zeroTo63 += "," + i;
+                zeroTo63 += ";" + i;
 
-            csvContent.AppendLine("Variable,PlayerValue" + zeroTo63);
+            csvContent.AppendLine("Variable;PlayerValue" + zeroTo63);
 
             foreach (var header in Sdk.VarHeaders)
             {
@@ -552,7 +552,7 @@ namespace iRacingSdkWrapper
                             if (header.Value.Count > 1)
                             {
                                 if (header.Value.Count >= playerIdx)
-                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + "," + string.Join(",", GetTelemetryValue<float[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
+                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + ";" + string.Join(";", GetTelemetryValue<float[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
                                 else
                                 {
                                     for (int i = 0; i < header.Value.Count; i++)
@@ -566,7 +566,7 @@ namespace iRacingSdkWrapper
                             if (header.Value.Count > 1)
                             {
                                 if (header.Value.Count >= playerIdx)
-                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + "," + string.Join(",", GetTelemetryValue<double[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
+                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + ";" + string.Join(";", GetTelemetryValue<double[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
                                 else
                                 {
                                     for (int i = 0; i < header.Value.Count; i++)
@@ -592,7 +592,7 @@ namespace iRacingSdkWrapper
             if (header.Value.Count > 1)
             {
                 if (header.Value.Count >= playerIdx)
-                    csvContent.AppendLine(ExtractHeaderKeyValuePair<T>(header, playerIdx) + "," + string.Join(",", GetTelemetryValue<T[]>(header.Value.Name).Value));
+                    csvContent.AppendLine(ExtractHeaderKeyValuePair<T>(header, playerIdx) + ";" + string.Join(";", GetTelemetryValue<T[]>(header.Value.Name).Value));
                 else
                 {
                     for (int i = 0; i < header.Value.Count; i++)
@@ -605,12 +605,32 @@ namespace iRacingSdkWrapper
 
         private string ExtractHeaderKeyAndValue<T>(KeyValuePair<string, CVarHeader> header)
         {
-            return header.Key + "," + GetTelemetryValue<T>(header.Value.Name).Value;
+            return header.Key + ";" + GetTelemetryValue<T>(header.Value.Name).Value;
         }
 
         private string ExtractHeaderKeyValuePair<T>(KeyValuePair<string, CVarHeader> header, int i)
         {
-            return header.Key + "_" + i + "," + GetTelemetryValue<T[]>(header.Value.Name).Value[i];
+            return header.Key + "_" + i + ";" + GetTelemetryValue<T[]>(header.Value.Name).Value[i];
+        }
+
+        public string ToPrettyString()
+        {
+            StringBuilder sb = new();
+            sb.AppendLine($"IsRunning;{IsRunning}");
+            sb.AppendLine($"IsConnected;{IsConnected}");
+            sb.AppendLine($"ConnectSleepTime;{ConnectSleepTime}");
+            sb.AppendLine($"DriverId;{DriverId}");
+            sb.AppendLine($"_loggedFirst;{_loggedFirst}");
+            sb.AppendLine($"sdk;{(sdk != null ? "Exist" : "null")}");
+            if (sdk != null)
+            {
+                sb.AppendLine($"sdk.Header;{sdk.Header}");
+                sb.AppendLine($"sdk.IsInitialized;{sdk.IsInitialized}");
+                sb.AppendLine($"sdk.VarHeaderSize;{sdk.VarHeaderSize}");
+                sb.AppendLine($"sdk.IsConnected();{sdk.IsConnected()}");
+                
+            }
+            return sb.ToString();
         }
     }
 }
