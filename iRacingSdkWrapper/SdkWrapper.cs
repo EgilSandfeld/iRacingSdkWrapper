@@ -517,7 +517,7 @@ namespace iRacingSdkWrapper
 
         #endregion
 
-        public string GetTelemetryAsCSV(int playerIdx)
+        public string GetTelemetryAsCsv(int playerIdx)
         {
             if (Sdk == null)
                 return "";
@@ -529,6 +529,7 @@ namespace iRacingSdkWrapper
                 zeroTo63 += ";" + i;
 
             csvContent.AppendLine("Variable;PlayerValue" + zeroTo63);
+            csvContent.AppendLine("TimeUTC;" + DateTime.UtcNow.ToString("HH:mm:ss.fff"));
 
             foreach (var header in Sdk.VarHeaders)
             {
