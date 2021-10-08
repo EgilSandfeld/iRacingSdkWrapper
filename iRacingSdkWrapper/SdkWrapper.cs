@@ -58,13 +58,13 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Gets the underlying iRacingSDK object.
         /// </summary>
-        public iRacingSDK Sdk { get { return sdk; } }
+        public iRacingSDK Sdk => sdk;
 
         /// <summary>
         /// Gets or sets how events are raised. Choose 'CurrentThread' to raise the events on the thread you created this object on (typically the UI thread), 
         /// or choose 'BackgroundThread' to raise the events on a background thread, in which case you have to delegate any UI code to your UI thread to avoid cross-thread exceptions.
         /// </summary>
-        public EventRaiseTypes EventRaiseType { get; set; }
+        private EventRaiseTypes EventRaiseType { get; set; }
 
         //private bool _IsRunning;
         /// <summary>
@@ -76,7 +76,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Is the SDK connected to iRacing?
         /// </summary>
-        public bool IsConnected { get { return _IsConnected; } }
+        public bool IsConnected => _IsConnected && _driverId > -1;
 
         private double _TelemetryUpdateFrequency;
         /// <summary>
@@ -113,7 +113,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
         /// </summary>
-        public int DriverId { get { return _driverId; } }
+        public int DriverId => _driverId;
 
         #region Broadcast messages
 
