@@ -625,10 +625,25 @@ namespace iRacingSdkWrapper
             sb.AppendLine($"sdk;{(sdk != null ? "Exist" : "null")}");
             if (sdk != null)
             {
-                sb.AppendLine($"sdk.Header;{sdk.Header}");
                 sb.AppendLine($"sdk.IsInitialized;{sdk.IsInitialized}");
                 sb.AppendLine($"sdk.VarHeaderSize;{sdk.VarHeaderSize}");
                 sb.AppendLine($"sdk.IsConnected();{sdk.IsConnected()}");
+                if (sdk.Header != null)
+                {
+                    sb.AppendLine($"sdk.Header.Buffer;{sdk.Header.Buffer}");
+                    sb.AppendLine($"sdk.Header.Status;{sdk.Header.Status}");
+                    sb.AppendLine($"sdk.Header.Version;{sdk.Header.Version}");
+                    sb.AppendLine($"sdk.Header.BufferCount;{sdk.Header.BufferCount}");
+                    sb.AppendLine($"sdk.Header.BufferLength;{sdk.Header.BufferLength}");
+                    sb.AppendLine($"sdk.Header.TickRate;{sdk.Header.TickRate}");
+                    sb.AppendLine($"sdk.Header.VarCount;{sdk.Header.VarCount}");
+                    sb.AppendLine($"sdk.Header.SessionInfoLength;{sdk.Header.SessionInfoLength}");
+                    sb.AppendLine($"sdk.Header.SessionInfoOffset;{sdk.Header.SessionInfoOffset}");
+                    sb.AppendLine($"sdk.Header.SessionInfoUpdate;{sdk.Header.SessionInfoUpdate}");
+                    sb.AppendLine($"sdk.Header.VarHeaderOffset;{sdk.Header.VarHeaderOffset}");
+                }
+                else
+                    sb.AppendLine($"sdk.Header;null");
                 
             }
             return sb.ToString();
