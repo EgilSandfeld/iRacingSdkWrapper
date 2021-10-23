@@ -109,6 +109,7 @@ namespace iRacingSdkWrapper
 
         private int _driverId;
         private bool _loggedFirst;
+        private bool memoryFileExists;
 
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
@@ -183,6 +184,9 @@ namespace iRacingSdkWrapper
             runCT.Cancel(true);
             WaitHandle.WaitAny(new[] { runCT.Token.WaitHandle });
             runCT = null;
+            
+            sdk?.Shutdown();
+            
             _logger?.Invoke($"iRacing SDK wrapper stopped at {DateTime.UtcNow:HH-mm-ss}");
         }
 
@@ -259,8 +263,14 @@ namespace iRacingSdkWrapper
                     {
                         if (!_IsConnected)
                         {
-                            // If this is the first time, raise the Connected event
-                            _logger?.Invoke($"iRacing SDK Wrapper found iRacing at {DateTime.UtcNow:HH-mm-ss}");
+                            // If this is the first time for the app but iRacing memory mapping file exists in memory, or a server change, restart the iRacing SDK, so we get the new server's memory mapping
+                            if (hasConnected)
+                            {
+                                sdk.Shutdown();
+                                memoryFileExists = sdk.Startup();
+                            }
+                            
+                            _logger?.Invoke($"iRacing SDK Wrapper connected to iRacing at {DateTime.UtcNow:HH-mm-ss}");
                             RaiseEvent(OnConnected, EventArgs.Empty);
                         }
 
@@ -306,36 +316,37 @@ namespace iRacingSdkWrapper
                             RaiseEvent(OnSessionInfoUpdated, sessionArgs);
                         }
                     }
-                    else if (hasConnected)
+                    else if (_IsConnected)
                     {
                         // We have already been initialized before, so the sim is closing
                         RaiseEvent(OnDisconnected, EventArgs.Empty);
 
-                        sdk.Shutdown();
+                        //sdk.Shutdown();
                         lastUpdate = -1;
                         _IsConnected = false;
-                        hasConnected = false;
-                        _logger?.Invoke($"iRacing SDK Wrapper shut down at {DateTime.UtcNow:HH-mm-ss}");
+                        //hasConnected = false;
+                        _logger?.Invoke($"iRacing SDK Wrapper disconnecting from server at {DateTime.UtcNow:HH-mm-ss}");
                     }
                     else
                     {
                         _IsConnected = false;
-                        hasConnected = false;
+                        //hasConnected = false;
 
                         //Try to find the sim
                         if (!_loggedFirst)
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup at {DateTime.UtcNow:HH-mm-ss}");
                         
-                        var result = sdk.Startup();
+                        if (!hasConnected)
+                            memoryFileExists = sdk.Startup();
                         
-                        if (!_loggedFirst || result)
-                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup {result} at {DateTime.UtcNow:HH-mm-ss}");
+                        if (!_loggedFirst || memoryFileExists)
+                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup {hasConnected} at {DateTime.UtcNow:HH-mm-ss}");
 
                         _loggedFirst = true;
                     }
 
                     // Sleep for a short amount of time until the next update is available
-                    if (_IsConnected)
+                    if (_IsConnected || sdk.Header?.Status == 1)
                     {
                         if (waitTime <= 0 || waitTime > 1000) 
                             waitTime = 15;

@@ -19,6 +19,7 @@ namespace iRSDKSharp
         MemoryMappedViewAccessor FileMapView = null;
 
         CVarBuf buffer = null;
+        private int newStatus = -1;
 
         public CiRSDKHeader(MemoryMappedViewAccessor mapView)
         {
@@ -31,9 +32,18 @@ namespace iRSDKSharp
             get { return FileMapView.ReadInt32(HVerOffset); }
         }
 
+        private int _status;
         public int Status
         {
-            get { return FileMapView.ReadInt32(HStatusOffset); }
+            get
+            {
+                newStatus = FileMapView.ReadInt32(HStatusOffset);
+                if (_status == newStatus)
+                    return _status;
+                
+                _status = newStatus;
+                return _status;
+            }
         }
 
         public int TickRate
@@ -58,7 +68,10 @@ namespace iRSDKSharp
 
         public int VarCount
         {
-            get { return FileMapView.ReadInt32(HNumVarsOffset); }
+            get
+            {
+                return FileMapView.ReadInt32(HNumVarsOffset);
+            }
         }
 
         public int VarHeaderOffset
