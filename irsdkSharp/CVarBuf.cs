@@ -32,22 +32,33 @@ namespace iRSDKSharp
         {
             get
             {
-                int bufCount = Header.BufferCount;
-                int[] ticks = new int[Header.BufferCount];
-                for (int i = 0; i < bufCount; i++)
+                try
                 {
-                    ticks[i] = FileMapView.ReadInt32(VarBufOffset + ((i * VarBufSize) + VarTickCountOffset));
-                }
-                int latestTick = ticks[0];
-                int latest = 0;
-                for (int i = 0; i < bufCount; i++)
-                {
-                    if (latestTick < ticks[i])
+                    int bufCount = Header.BufferCount;
+                    int[] ticks = new int[Header.BufferCount];
+                    for (int i = 0; i < bufCount; i++)
                     {
-                        latest = i;
+                        ticks[i] = FileMapView.ReadInt32(VarBufOffset + ((i * VarBufSize) + VarTickCountOffset));
                     }
+
+                    if (ticks.Length == 0)
+                        return 0;
+                    
+                    int latestTick = ticks[0];
+                    int latest = 0;
+                    for (int i = 0; i < bufCount; i++)
+                    {
+                        if (latestTick < ticks[i])
+                        {
+                            latest = i;
+                        }
+                    }
+                    return FileMapView.ReadInt32(VarBufOffset + ((latest * VarBufSize) + VarBufOffsetOffset));
                 }
-                return FileMapView.ReadInt32(VarBufOffset + ((latest * VarBufSize) + VarBufOffsetOffset));
+                catch (IndexOutOfRangeException)
+                {
+                    return 0;
+                }
             }
         }
     }

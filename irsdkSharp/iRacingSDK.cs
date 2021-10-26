@@ -128,70 +128,67 @@ namespace iRSDKSharp
 
         public object GetData(string name)
         {
-            if (IsInitialized && Header != null)
+            if (!IsInitialized || Header == null || !VarHeaders.ContainsKey(name)) 
+                return null;
+
+            int varOffset = VarHeaders[name].Offset;
+            int count = VarHeaders[name].Count;
+            if (VarHeaders[name].Type == CVarHeader.VarType.irChar)
             {
-                if (VarHeaders.ContainsKey(name))
+                byte[] data = new byte[count];
+                FileMapView.ReadArray<byte>(Header.Buffer + varOffset, data, 0, count);
+                return encoder.GetString(data).TrimEnd(new char[] { '\0' });
+            }
+            else if (VarHeaders[name].Type == CVarHeader.VarType.irBool)
+            {
+                if (count > 1)
                 {
-                    int varOffset = VarHeaders[name].Offset;
-                    int count = VarHeaders[name].Count;
-                    if (VarHeaders[name].Type == CVarHeader.VarType.irChar)
-                    {
-                        byte[] data = new byte[count];
-                        FileMapView.ReadArray<byte>(Header.Buffer + varOffset, data, 0, count);
-                        return encoder.GetString(data).TrimEnd(new char[] { '\0' });
-                    }
-                    else if (VarHeaders[name].Type == CVarHeader.VarType.irBool)
-                    {
-                        if (count > 1)
-                        {
-                            bool[] data = new bool[count];
-                            FileMapView.ReadArray<bool>(Header.Buffer + varOffset, data, 0, count);
-                            return data;
-                        }
-                        else
-                        {
-                            return FileMapView.ReadBoolean(Header.Buffer + varOffset);
-                        }
-                    }
-                    else if (VarHeaders[name].Type == CVarHeader.VarType.irInt || VarHeaders[name].Type == CVarHeader.VarType.irBitField)
-                    {
-                        if (count > 1)
-                        {
-                            int[] data = new int[count];
-                            FileMapView.ReadArray<int>(Header.Buffer + varOffset, data, 0, count);
-                            return data;
-                        }
-                        else
-                        {
-                            return FileMapView.ReadInt32(Header.Buffer + varOffset);
-                        }
-                    }
-                    else if (VarHeaders[name].Type == CVarHeader.VarType.irFloat)
-                    {
-                        if (count > 1)
-                        {
-                            float[] data = new float[count];
-                            FileMapView.ReadArray<float>(Header.Buffer + varOffset, data, 0, count);
-                            return data;
-                        }
-                        else
-                        {
-                            return FileMapView.ReadSingle(Header.Buffer + varOffset);
-                        }
-                    }
-                    else if (VarHeaders[name].Type == CVarHeader.VarType.irDouble)
-                    {
-                        if (count > 1)
-                        {
-                            double[] data = new double[count];
-                            FileMapView.ReadArray<double>(Header.Buffer + varOffset, data, 0, count);
-                            return data;
-                        }
-                        else
-                        {
-                            return FileMapView.ReadDouble(Header.Buffer + varOffset);
-                        }
-                    }
+                    bool[] data = new bool[count];
+                    FileMapView.ReadArray<bool>(Header.Buffer + varOffset, data, 0, count);
+                    return data;
+                }
+                else
+                {
+                    return FileMapView.ReadBoolean(Header.Buffer + varOffset);
+                }
+            }
+            else if (VarHeaders[name].Type == CVarHeader.VarType.irInt || VarHeaders[name].Type == CVarHeader.VarType.irBitField)
+            {
+                if (count > 1)
+                {
+                    int[] data = new int[count];
+                    FileMapView.ReadArray<int>(Header.Buffer + varOffset, data, 0, count);
+                    return data;
+                }
+                else
+                {
+                    return FileMapView.ReadInt32(Header.Buffer + varOffset);
+                }
+            }
+            else if (VarHeaders[name].Type == CVarHeader.VarType.irFloat)
+            {
+                if (count > 1)
+                {
+                    float[] data = new float[count];
+                    FileMapView.ReadArray<float>(Header.Buffer + varOffset, data, 0, count);
+                    return data;
+                }
+                else
+                {
+                    return FileMapView.ReadSingle(Header.Buffer + varOffset);
+                }
+            }
+            else if (VarHeaders[name].Type == CVarHeader.VarType.irDouble)
+            {
+                if (count > 1)
+                {
+                    double[] data = new double[count];
+                    FileMapView.ReadArray<double>(Header.Buffer + varOffset, data, 0, count);
+                    return data;
+                }
+                else
+                {
+                    return FileMapView.ReadDouble(Header.Buffer + varOffset);
                 }
             }
             return null;
