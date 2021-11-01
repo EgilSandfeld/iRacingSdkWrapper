@@ -93,7 +93,8 @@ namespace iRacingSdkWrapper
         {
             try
             {
-                using (var reader = new StringReader(this.Yaml))
+                var yaml = Yaml.Replace("AbbrevName:  ,  ", "AbbrevName: One, No");
+                using (var reader = new StringReader(yaml))
                 {
                     _yamlStream = new YamlStream();
                     _yamlStream.Load(reader);

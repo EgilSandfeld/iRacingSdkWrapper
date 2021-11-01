@@ -216,9 +216,9 @@ namespace iRSDKSharp
 
         public void Shutdown()
         {
-            IsInitialized = false;
             Header = null;
             iRacingFile?.Dispose();
+            IsInitialized = false;
         }
 
         IntPtr GetBroadcastMessageID()

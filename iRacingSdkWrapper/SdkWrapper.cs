@@ -39,7 +39,7 @@ namespace iRacingSdkWrapper
             this.sdk = new iRacingSDK();
             this.EventRaiseType = EventRaiseTypes.CurrentThread;
 
-            readMutex = new Mutex(false);
+            //readMutex = new Mutex(false);
 
             this.TelemetryUpdateFrequency = 60;
             this.ConnectSleepTime = 1000;
@@ -111,7 +111,7 @@ namespace iRacingSdkWrapper
         private bool _loggedFirst;
         private bool _loggedFirstConnecting;
         private bool memoryFileExists;
-
+        private Object runCTLock = new object();
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
         /// </summary>
@@ -161,11 +161,15 @@ namespace iRacingSdkWrapper
         public void Start(Action<string> logger)
         {
             _logger = logger;
-            Stop();
+            //Stop();
 
-            // Create new cancellation token and run the looper
-            runCT = new CancellationTokenSource();
-            Task.Run(() => Loop(runCT.Token), runCT.Token);
+            lock (runCTLock)
+            {
+                readMutex = new Mutex(false);
+                // Create new cancellation token and run the looper
+                runCT = new CancellationTokenSource();
+                Task.Run(() => Loop(runCT.Token), runCT.Token);
+            }
 
             _logger?.Invoke($"iRacing SDK wrapper started");
         }
@@ -181,12 +185,16 @@ namespace iRacingSdkWrapper
                 return;
             }
 
-            _logger?.Invoke($"iRacing SDK wrapper stopping");
-            runCT.Cancel(true);
-            WaitHandle.WaitAny(new[] { runCT.Token.WaitHandle });
-            runCT = null;
-            
-            sdk?.Shutdown();
+            lock (runCTLock)
+            {
+                _logger?.Invoke($"iRacing SDK wrapper stopping");
+                runCT.Cancel(true);
+                WaitHandle.WaitAny(new[] { runCT.Token.WaitHandle });
+                runCT.Dispose();
+                runCT = null;
+                
+                sdk?.Shutdown();
+            }
             
             _logger?.Invoke($"iRacing SDK wrapper stopped");
         }
@@ -264,11 +272,13 @@ namespace iRacingSdkWrapper
                     {
                         if (!_IsConnected)
                         {
+                            _IsConnected = true;
+                            
                             // If this is the first time for the app but iRacing memory mapping file exists in memory, or a server change, restart the iRacing SDK, so we get the new server's memory mapping
                             if (hasConnected)
                             {
                                 _logger?.Invoke($"iRacing SDK Wrapper restarting");
-                                sdk.Shutdown();
+                                sdk?.Shutdown();
                                 memoryFileExists = sdk.Startup();
                             }
                             
@@ -277,7 +287,6 @@ namespace iRacingSdkWrapper
                         }
 
                         hasConnected = true;
-                        _IsConnected = true;
 
                         readMutex.WaitOne(8);
 
@@ -387,7 +396,7 @@ namespace iRacingSdkWrapper
 
             try
             {
-                sdk.Shutdown();
+                sdk?.Shutdown();
             }
             catch (Exception ex)
             {
