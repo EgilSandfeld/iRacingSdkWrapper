@@ -112,6 +112,8 @@ namespace iRacingSdkWrapper
         private bool _loggedFirstConnecting;
         private bool memoryFileExists;
         private Object runCTLock = new object();
+        private bool initialConnectingWithMemoryExisting;
+
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
         /// </summary>
@@ -275,11 +277,12 @@ namespace iRacingSdkWrapper
                             _IsConnected = true;
                             
                             // If this is the first time for the app but iRacing memory mapping file exists in memory, or a server change, restart the iRacing SDK, so we get the new server's memory mapping
-                            if (hasConnected)
+                            if (hasConnected || initialConnectingWithMemoryExisting)
                             {
                                 _logger?.Invoke($"iRacing SDK Wrapper restarting");
                                 sdk?.Shutdown();
                                 memoryFileExists = sdk.Startup();
+                                initialConnectingWithMemoryExisting = false;
                             }
                             
                             _logger?.Invoke($"iRacing SDK Wrapper connected to iRacing");
@@ -350,11 +353,16 @@ namespace iRacingSdkWrapper
                         if (!hasConnected)
                             memoryFileExists = sdk.Startup();
 
-                        if (memoryFileExists && (sdk.Header == null || sdk.Header.VarCount == 0) && (!_loggedFirstConnecting || hasConnected))
+                        if (memoryFileExists 
+                            && (sdk.Header == null || sdk.Header.VarCount == 0) 
+                            && (!_loggedFirstConnecting || hasConnected))
                         {
                             RaiseEvent(OnConnecting, EventArgs.Empty);
                             memoryFileExists = false;
                             _loggedFirstConnecting = true;
+
+                            if (!hasConnected)
+                                initialConnectingWithMemoryExisting = true;
                         }
                         
                         if (!_loggedFirst)
