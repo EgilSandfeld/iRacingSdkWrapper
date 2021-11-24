@@ -190,10 +190,13 @@ namespace iRacingSdkWrapper
             lock (runCTLock)
             {
                 _logger?.Invoke($"iRacing SDK wrapper stopping");
-                runCT.Cancel(true);
-                WaitHandle.WaitAny(new[] { runCT.Token.WaitHandle });
-                runCT.Dispose();
-                runCT = null;
+                if (runCT != null)
+                {
+                    runCT.Cancel(true);
+                    WaitHandle.WaitAny(new[] { runCT.Token.WaitHandle });
+                    runCT.Dispose();
+                    runCT = null;
+                }
                 
                 sdk?.Shutdown();
             }
