@@ -603,13 +603,13 @@ namespace iRacingSdkWrapper
                         case CVarHeader.VarType.irFloat:
                             if (header.Value.Count > 1)
                             {
-                                if (header.Value.Count >= playerIdx)
-                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + ";" + string.Join(";", GetTelemetryValue<float[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
-                                else
-                                {
+                                // if (header.Value.Count >= playerIdx)
+                                //     csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + ";" + string.Join(";", GetTelemetryValue<float[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
+                                // else
+                                // {
                                     for (int i = 0; i < header.Value.Count; i++)
                                         csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, i).ToString(CultureInfo.InvariantCulture));
-                                }
+                                // }
                             }
                             else
                                 csvContent.AppendLine(ExtractHeaderKeyAndValue<float>(header).ToString(CultureInfo.InvariantCulture));
@@ -617,13 +617,13 @@ namespace iRacingSdkWrapper
                         case CVarHeader.VarType.irDouble:
                             if (header.Value.Count > 1)
                             {
-                                if (header.Value.Count >= playerIdx)
-                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + ";" + string.Join(";", GetTelemetryValue<double[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
-                                else
-                                {
+                                // if (header.Value.Count >= playerIdx)
+                                //     csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + ";" + string.Join(";", GetTelemetryValue<double[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
+                                // else
+                                // {
                                     for (int i = 0; i < header.Value.Count; i++)
                                         csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, i).ToString(CultureInfo.InvariantCulture));
-                                }
+                                // }
                             }
                             else
                                 csvContent.AppendLine(ExtractHeaderKeyAndValue<double>(header).ToString(CultureInfo.InvariantCulture));

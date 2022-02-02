@@ -82,6 +82,9 @@ namespace iRacingSdkWrapper
                 }
                 else
                 {
+                    if (data == null)
+                        return;
+                    
                     _Value = (T)data;
                 }
             }
