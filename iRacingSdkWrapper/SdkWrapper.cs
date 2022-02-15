@@ -28,6 +28,43 @@ namespace iRacingSdkWrapper
         private CancellationTokenSource runCT;
         private Action<string> _logger;
 
+        const string playerCarIdx = "PlayerCarIdx";
+        const string sessiontime = "SessionTime";
+        
+        private Action<EventArgs> _onConnectedDelegate;
+        public Action<EventArgs> OnConnectedDelegate
+        {
+            get { return _onConnectedDelegate ??= OnConnected; }
+        }
+        
+        private Action<EventArgs> _onDisconnectedDelegate;
+        public Action<EventArgs> OnDisconnectedDelegate
+        {
+            get { return _onDisconnectedDelegate ??= OnDisconnected; }
+        }
+        
+        private Action<EventArgs> _onConnectingDelegate;
+        public Action<EventArgs> OnConnectingDelegate
+        {
+            get { return _onConnectingDelegate ??= OnConnecting; }
+        }
+        
+        private Action<TelemetryUpdatedEventArgs> _telemetryUpdatedDelegate;
+        public Action<TelemetryUpdatedEventArgs> TelemetryUpdatedDelegate
+        {
+            get { return _telemetryUpdatedDelegate ??= OnTelemetryUpdated; }
+        }
+        
+        private Action<SessionInfoUpdatedEventArgs> _onSessionInfoUpdated;
+        public Action<SessionInfoUpdatedEventArgs> OnSessionInfoUpdatedDelegate
+        {
+            get { return _onSessionInfoUpdated ??= OnSessionInfoUpdated; }
+        }
+        
+        private readonly TelemetryInfo _telemetryInfo = new (null);
+        private TelemetryUpdatedEventArgs _telArgs = null;
+
+
         #endregion
 
         /// <summary>
@@ -260,10 +297,11 @@ namespace iRacingSdkWrapper
                 return null;
             }
         }
+        
 
         private void Loop(CancellationToken ct)
         {
-            _logger?.Invoke($"iRacing SDK Loop");
+            _logger?.Invoke("iRacing SDK Loop");
             int lastUpdate = -1;
             bool hasConnected = false;
             int tries = 0;
@@ -282,14 +320,14 @@ namespace iRacingSdkWrapper
                             // If this is the first time for the app but iRacing memory mapping file exists in memory, or a server change, restart the iRacing SDK, so we get the new server's memory mapping
                             if (hasConnected || initialConnectingWithMemoryExisting)
                             {
-                                _logger?.Invoke($"iRacing SDK Wrapper restarting");
+                                //_logger?.Invoke($"iRacing SDK Wrapper restarting");
                                 sdk?.Shutdown();
                                 memoryFileExists = sdk.Startup();
                                 initialConnectingWithMemoryExisting = false;
                             }
                             
-                            _logger?.Invoke($"iRacing SDK Wrapper connected to iRacing");
-                            RaiseEvent(OnConnected, EventArgs.Empty);
+                            //_logger?.Invoke($"iRacing SDK Wrapper connected to iRacing");
+                            RaiseEvent(OnConnectedDelegate, EventArgs.Empty);
                         }
 
                         hasConnected = true;
@@ -299,16 +337,21 @@ namespace iRacingSdkWrapper
                         // Parse out your own driver Id
                         if (_driverId == -1)
                         {
-                            _driverId = (int)sdk.GetData("PlayerCarIdx");
-                            _logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId}");
+                            _driverId = (int)sdk.GetData(playerCarIdx);
+                            //_logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId}");
                         }
 
                         // Get the session time (in seconds) of this update
-                        var time = (double)sdk.GetData("SessionTime");
+                        var time = (double)sdk.GetData(sessiontime);
 
                         // Raise the TelemetryUpdated event and pass along the lap info and session time
-                        var telArgs = new TelemetryUpdatedEventArgs(new TelemetryInfo(sdk), time);
-                        RaiseEvent(OnTelemetryUpdated, telArgs);
+                        _telemetryInfo.Sdk = sdk;
+                        if (_telArgs == null)
+                            _telArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time);
+                        else 
+                            _telArgs.Update(_telemetryInfo, time);
+                        
+                        RaiseEvent(TelemetryUpdatedDelegate, _telArgs);
 
                         // Is the session info updated?
                         var newUpdate = sdk.Header?.SessionInfoUpdate ?? lastUpdate;
@@ -319,10 +362,10 @@ namespace iRacingSdkWrapper
 
                             //Force check Player Car Id again, to be sure when crossing from warm up practice -> race server practice, that the ID updates.
                             //This is required since iRacing is not shut down inbetween session changes, thus never gets to set DriverId to -1
-                            if (_driverId != -1 && _driverId != (int)sdk.GetData("PlayerCarIdx"))
+                            if (_driverId != -1 && _driverId != (int)sdk.GetData(playerCarIdx))
                             {
-                                _driverId = (int)sdk.GetData("PlayerCarIdx");
-                                _logger?.Invoke($"iRacing SDK Wrapper found updated player car id {_driverId}");
+                                _driverId = (int)sdk.GetData(playerCarIdx);
+                                //_logger?.Invoke($"iRacing SDK Wrapper found updated player car id {_driverId}");
                             }
 
                             // Get the session info string
@@ -330,28 +373,23 @@ namespace iRacingSdkWrapper
 
                             // Raise the SessionInfoUpdated event and pass along the session info and session time.
                             var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
-                            RaiseEvent(OnSessionInfoUpdated, sessionArgs);
+                            RaiseEvent(OnSessionInfoUpdatedDelegate, sessionArgs);
                         }
                     }
                     else if (_IsConnected)
                     {
                         // We have already been initialized before, so the sim is closing
-                        RaiseEvent(OnDisconnected, EventArgs.Empty);
+                        RaiseEvent(OnDisconnectedDelegate, EventArgs.Empty);
 
-                        //sdk.Shutdown();
                         lastUpdate = -1;
                         _IsConnected = false;
-                        //hasConnected = false;
-                        _logger?.Invoke($"iRacing SDK Wrapper disconnecting from server");
+                        //_logger?.Invoke($"iRacing SDK Wrapper disconnecting from server");
                     }
                     else
                     {
                         _IsConnected = false;
-                        //hasConnected = false;
-
-                        //Try to find the sim
-                        if (!_loggedFirst)
-                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup");
+                        //if (!_loggedFirst)
+                        //    _logger?.Invoke($"iRacing SDK Wrapper SDK startup");
                         
                         if (!hasConnected)
                             memoryFileExists = sdk.Startup();
@@ -360,7 +398,7 @@ namespace iRacingSdkWrapper
                             && (sdk.Header == null || sdk.Header.VarCount == 0) 
                             && (!_loggedFirstConnecting || hasConnected))
                         {
-                            RaiseEvent(OnConnecting, EventArgs.Empty);
+                            RaiseEvent(OnConnectingDelegate, EventArgs.Empty);
                             memoryFileExists = false;
                             _loggedFirstConnecting = true;
 
@@ -368,8 +406,8 @@ namespace iRacingSdkWrapper
                                 initialConnectingWithMemoryExisting = true;
                         }
                         
-                        if (!_loggedFirst)
-                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup hasConnected: {hasConnected} memoryFileExists: {memoryFileExists}");
+                        //if (!_loggedFirst)
+                        //    _logger?.Invoke($"iRacing SDK Wrapper SDK startup hasConnected: {hasConnected} memoryFileExists: {memoryFileExists}");
 
                         _loggedFirst = true;
                     }
@@ -384,7 +422,7 @@ namespace iRacingSdkWrapper
                     }
                     else
                     {
-                        _logger?.Invoke($"iRacing SDK Wrapper sleeping");
+                        //_logger?.Invoke("iRacing SDK Wrapper sleeping");
                         // Not connected yet, no need to check every 16 ms, let's try again in some time
                         Thread.Sleep(ConnectSleepTime);
                     }
@@ -415,8 +453,9 @@ namespace iRacingSdkWrapper
             }
             
             _IsConnected = false;
-            _logger?.Invoke($"iRacing SDK Wrapper connection cancelled");
+            _logger?.Invoke("iRacing SDK Wrapper connection cancelled");
         }
+
 
         #endregion
 
@@ -528,14 +567,18 @@ namespace iRacingSdkWrapper
         {
             public SdkUpdateEventArgs(double time)
             {
-                _UpdateTime = time;
+                _updateTime = time;
             }
 
-            private readonly double _UpdateTime;
+            private double _updateTime;
             /// <summary>
             /// Gets the time (in seconds) when this update occured.
             /// </summary>
-            public double UpdateTime { get { return _UpdateTime; } }
+            public double UpdateTime
+            {
+                get { return _updateTime; }
+                set => _updateTime = value;
+            }
         }
 
         public class SessionInfoUpdatedEventArgs : SdkUpdateEventArgs
@@ -556,14 +599,20 @@ namespace iRacingSdkWrapper
         {
             public TelemetryUpdatedEventArgs(TelemetryInfo info, double time) : base(time)
             {
-                _TelemetryInfo = info;
+                _telemetryInfo = info;
             }
 
-            private readonly TelemetryInfo _TelemetryInfo;
+            public void Update(TelemetryInfo info, double time)
+            {
+                _telemetryInfo = info;
+                UpdateTime = time;
+            }
+
+            private TelemetryInfo _telemetryInfo;
             /// <summary>
             /// Gets the telemetry info object.
             /// </summary>
-            public TelemetryInfo TelemetryInfo { get { return _TelemetryInfo; } }
+            public TelemetryInfo TelemetryInfo => _telemetryInfo;
         }
 
         #endregion
