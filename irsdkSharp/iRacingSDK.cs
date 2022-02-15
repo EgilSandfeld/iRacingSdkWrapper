@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO.MemoryMappedFiles;
@@ -74,11 +76,12 @@ namespace iRSDKSharp
             encoder = Encoding.GetEncoding(1252);
         }
 
+        
         public bool Startup()
         {
             if (IsInitialized)
                 return true;
-            
+
             try
             {
                 iRacingFile = MemoryMappedFile.OpenExisting(Defines.MemMapFileName);
@@ -98,12 +101,17 @@ namespace iRSDKSharp
 
                 IsInitialized = true;
             }
+            catch (FileNotFoundException)
+            {
+                return false; //This is called when the sim is not running, so all normal activity here
+            }
             catch (Exception)
             {
                 return false;
             }
             return true;
         }
+        
 
         private void GetVarHeaders()
         {
@@ -274,6 +282,10 @@ namespace iRSDKSharp
         {
             return (short)dword;
         }
+    }
+
+    internal class IgnoreException : Exception
+    {
     }
 
     //144 bytes
