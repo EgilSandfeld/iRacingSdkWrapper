@@ -279,6 +279,10 @@ namespace iRacingSdkWrapper
                 var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
                 RaiseEvent(OnSessionInfoUpdated, sessionArgs);
             }
+            catch (NullReferenceException)
+            {
+                //Ignored, might happen shortly after wrapper restarts, where sessionInfo is not necessary yet
+            }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message + " " + ex.StackTrace);
