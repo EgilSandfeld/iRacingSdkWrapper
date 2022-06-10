@@ -100,6 +100,7 @@ namespace iRacingSdkWrapper
                     _yamlStream.Load(reader);
                     _yamlRoot = (YamlMappingNode)_yamlStream.Documents[0].RootNode;
                 }
+
                 _isValidYaml = true;
             }
             catch// (Exception ex)
