@@ -747,9 +747,10 @@ namespace iRacingSdkWrapper
             return header.Key + "_" + i + ";" + (variable.Value != null ? variable.Value[i] : "null");
         }
 
-        public string ToPrettyString()
+        public string ToPrettyString(string origin = "iRDSDK")
         {
             StringBuilder sb = new();
+            sb.AppendLine($"SDK Wrapper Origin;{origin}");
             sb.AppendLine($"IsRunning;{IsRunning}");
             sb.AppendLine($"IsConnected;{IsConnected}");
             sb.AppendLine($"ConnectSleepTime;{ConnectSleepTime}");
