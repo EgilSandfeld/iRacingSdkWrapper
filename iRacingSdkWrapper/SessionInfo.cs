@@ -87,14 +87,17 @@ namespace iRacingSdkWrapper
             {
                 _yaml = _yaml.Substring(0, indexOfSetup);
             }
+            
+            // AbbrevName missing name due to ??????????
+            _yaml = _yaml.Replace("AbbrevName:  ,  ", "AbbrevName: Doe, John");
+            _yaml = _yaml.Replace("AbbrevName:          ", "AbbrevName: Doe");
         }
 
         private void ParseYaml()
         {
             try
             {
-                var yaml = Yaml.Replace("AbbrevName:  ,  ", "AbbrevName: One, No");
-                using (var reader = new StringReader(yaml))
+                using (var reader = new StringReader(Yaml))
                 {
                     _yamlStream = new YamlStream();
                     _yamlStream.Load(reader);
