@@ -454,7 +454,9 @@ namespace iRacingSdkWrapper
                         _logger?.Invoke("iRacing SDK Wrapper error: " + ex.Message + " " + ex.TargetSite + " " + ex.StackTrace);
                     else
                     {
-                        string outPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "DRE", "Output", "CRASH-SDK-WRAPPER-" + DateTime.UtcNow.ToString("yyyyMMdd--HH-mm-ss") + ".txt");
+                        var dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DRE", "Docs", "Output");
+                        Directory.CreateDirectory(dir);
+                        string outPath = Path.Combine(dir, "CRASH-SDK-WRAPPER-" + DateTime.UtcNow.ToString("yyyyMMdd--HH-mm-ss") + ".txt");
                         File.WriteAllText(outPath, "iRacing SDK Wrapper error: " + ex.Message + " " + ex.TargetSite + " " + ex.StackTrace);
                         _logger?.Invoke("iRacing SDK Wrapper error file: " + outPath);
                         break;

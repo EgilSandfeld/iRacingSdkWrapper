@@ -236,6 +236,12 @@ namespace iRacingSdkWrapper
         /// Track surface type by car index. Unit: irsdk_TrkLoc
         /// </summary>
         public TelemetryValue<TrackSurfaces[]> CarIdxTrackSurface { get { return new TelemetryValue<TrackSurfaces[]>(Sdk, "CarIdxTrackSurface"); } }
+        
+        
+        /// <summary>
+        /// Track surface material type by car index. Unit: irsdk_TrkSurf
+        /// </summary>
+        public TelemetryValue<TrackSurfaceMaterials[]> CarIdxTrackSurfaceMaterial { get { return new TelemetryValue<TrackSurfaceMaterials[]>(Sdk, "CarIdxTrackSurfaceMaterial"); } }
 
 
         /// <summary>
@@ -255,15 +261,103 @@ namespace iRacingSdkWrapper
         /// </summary>
         public TelemetryValue<int[]> CarIdxGear { get { return new TelemetryValue<int[]>(Sdk, "CarIdxGear"); } }
 
+
+        /// <summary>
+        /// Number of fast repairs used by car index. Stays 0 in practice and qual 
+        /// </summary>
+        public TelemetryValue<int[]> CarIdxFastRepairsUsed { get { return new TelemetryValue<int[]>(Sdk, "CarIdxFastRepairsUsed"); } }
+
+
+        /// <summary>
+        /// Session flags by car index
+        /// </summary>
+        public TelemetryValue<SessionFlag[]> CarIdxSessionFlags { get { return new TelemetryValue<SessionFlag[]>(Sdk, "CarIdxSessionFlags"); } }
+
+        /// <summary>
+        /// Race time behind leader or fastest lap time otherwise
+        /// </summary>
         public TelemetryValue<float[]> CarIdxF2Time { get { return new TelemetryValue<float[]>(Sdk, "CarIdxF2Time"); } }
 
+        /// <summary>
+        /// Estimated time to reach current location on track
+        /// </summary>
         public TelemetryValue<float[]> CarIdxEstTime { get { return new TelemetryValue<float[]>(Sdk, "CarIdxEstTime"); } }
 
+        
+        /// <summary>
+        /// On pit road between the cones by car index
+        /// </summary>
         public TelemetryValue<bool[]> CarIdxOnPitRoad { get { return new TelemetryValue<bool[]>(Sdk, "CarIdxOnPitRoad"); } }
 
+        /// <summary>
+        /// Cars position in race by car index
+        /// </summary>
         public TelemetryValue<int[]> CarIdxPosition { get { return new TelemetryValue<int[]>(Sdk, "CarIdxPosition"); } }
 
+        
+        /// <summary>
+        /// Cars class index in race by car index
+        /// </summary>
+        public TelemetryValue<int[]> CarIdxClass { get { return new TelemetryValue<int[]>(Sdk, "CarIdxClass"); } }
+        
+        /// <summary>
+        /// Cars class position in race by car index
+        /// </summary>
         public TelemetryValue<int[]> CarIdxClassPosition { get { return new TelemetryValue<int[]>(Sdk, "CarIdxClassPosition"); } }
+        
+        /// <summary>
+        /// Cars best lap number
+        /// </summary>
+        public TelemetryValue<int[]> CarIdxBestLapNum { get { return new TelemetryValue<int[]>(Sdk, "CarIdxBestLapNum"); } }
+        
+        
+        /// <summary>
+        /// -1: No Selection/Unknown
+        /// 0: Soft ?
+        /// 1: Medium ?
+        /// 2: Hard ?
+        /// </summary>
+        public TelemetryValue<int[]> CarIdxTireCompound { get { return new TelemetryValue<int[]>(Sdk, "CarIdxTireCompound"); } }
+        
+        
+        /// <summary>
+        /// Tire compound index with which each team has set their best time in Qual - it will be -1 if none has been locked in so far
+        /// -1: Not locked
+        /// 0: Soft ?
+        /// 1: Medium ?
+        /// 2: Hard ?
+        /// </summary>
+        public TelemetryValue<int[]> CarIdxQualTireCompound { get { return new TelemetryValue<int[]>(Sdk, "CarIdxQualTireCompound"); } }
+        
+        
+        /// <summary>
+        ///  Indicates whether or not Race Control has officially locked that team in to that compound choice for the start of the race
+        /// -1: Not locked
+        /// 0: Soft ?
+        /// 1: Medium ?
+        /// 2: Hard ?
+        /// </summary>
+        public TelemetryValue<bool[]> CarIdxQualTireCompoundLocked { get { return new TelemetryValue<bool[]>(Sdk, "CarIdxQualTireCompoundLocked"); } }
+        
+        /// <summary>
+        /// Cars best lap time
+        /// </summary>
+        public TelemetryValue<float[]> CarIdxBestLapTime { get { return new TelemetryValue<float[]>(Sdk, "CarIdxBestLapTime"); } }
+        
+        /// <summary>
+        /// Cars last lap time
+        /// </summary>
+        public TelemetryValue<float[]> CarIdxLastLapTime { get { return new TelemetryValue<float[]>(Sdk, "CarIdxLastLapTime"); } }
+        
+        /// <summary>
+        /// Push2Pass count of usage (or remaining in Race)
+        /// </summary>
+        public TelemetryValue<float[]> CarIdxP2P_Count { get { return new TelemetryValue<float[]>(Sdk, "CarIdxP2P_Count"); } }
+        
+        /// <summary>
+        /// Push2Pass active or not
+        /// </summary>
+        public TelemetryValue<bool[]> CarIdxP2P_Status { get { return new TelemetryValue<bool[]>(Sdk, "CarIdxP2P_Status"); } }
 
 
         /// <summary>

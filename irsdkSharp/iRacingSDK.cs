@@ -136,7 +136,7 @@ namespace iRSDKSharp
 
         public object GetData(string name)
         {
-            if (!IsInitialized || Header == null || !VarHeaders.ContainsKey(name)) 
+            if (!IsInitialized || Header == null || name == null || !VarHeaders.ContainsKey(name)) 
                 return null;
 
             int varOffset = VarHeaders[name].Offset;
