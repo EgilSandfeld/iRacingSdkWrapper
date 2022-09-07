@@ -559,7 +559,7 @@ namespace iRacingSdkWrapper
 
 
         /// <summary>
-        /// Liters of fuel remaining. Unit: l
+        /// Liters/Kilowatt-hours of fuel remaining. Unit: l or kWh
         /// </summary>
         public TelemetryValue<float> FuelLevel { get { return new TelemetryValue<float>(Sdk, "FuelLevel"); } }
 
