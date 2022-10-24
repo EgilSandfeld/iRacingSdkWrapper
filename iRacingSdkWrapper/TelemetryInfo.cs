@@ -487,6 +487,12 @@ namespace iRacingSdkWrapper
 
 
         /// <summary>
+        /// Yaw orientation relative to north. Unit: rad
+        /// </summary>
+        public TelemetryValue<float> YawNorth { get { return new TelemetryValue<float>(Sdk, "YawNorth"); } }
+
+
+        /// <summary>
         /// Pitch orientation. Unit: rad
         /// </summary>
         public TelemetryValue<float> Pitch { get { return new TelemetryValue<float>(Sdk, "Pitch"); } }
