@@ -35,9 +35,12 @@ namespace iRacingSdkWrapper
                                     this.CarIdxLapCompleted,
                                     this.CarIdxLapDistPct,
                                     this.CarIdxTrackSurface,
+                                    this.CarIdxTrackSurfaceMaterial,
                                     this.CarIdxSteer,
                                     this.CarIdxRPM,
                                     this.CarIdxGear,
+                                    this.CarIdxFastRepairsUsed,
+                                    this.CarIdxSessionFlags,
                                     this.CarIdxF2Time,
                                     this.CarIdxEstTime,
                                     this.CarIdxOnPitRoad,
@@ -271,7 +274,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Session flags by car index
         /// </summary>
-        public TelemetryValue<SessionFlag[]> CarIdxSessionFlags { get { return new TelemetryValue<SessionFlag[]>(Sdk, "CarIdxSessionFlags"); } }
+        public TelemetryValue<SessionFlags[]> CarIdxSessionFlags { get { return new TelemetryValue<SessionFlags[]>(Sdk, "CarIdxSessionFlags"); } }
 
         /// <summary>
         /// Race time behind leader or fastest lap time otherwise
