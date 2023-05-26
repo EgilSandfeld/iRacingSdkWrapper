@@ -271,7 +271,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Session flags by car index
         /// </summary>
-        public TelemetryValue<SessionFlag[]> CarIdxSessionFlags { get { return new TelemetryValue<SessionFlag[]>(Sdk, "CarIdxSessionFlags"); } }
+        public TelemetryValue<SessionFlags[]> CarIdxSessionFlags { get { return new TelemetryValue<SessionFlags[]>(Sdk, "CarIdxSessionFlags"); } }
 
         /// <summary>
         /// Race time behind leader or fastest lap time otherwise
