@@ -1,7 +1,9 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using iRSDKSharp;
 using YamlDotNet.RepresentationModel;
 
@@ -85,6 +87,11 @@ namespace iRacingSdkWrapper
             var indexOfSetup = _yaml.IndexOf("CarSetup:");
             if (indexOfSetup > 0)
             {
+                var setupString = _yaml.Substring(indexOfSetup);
+                var setupFuelLevelMatch = Regex.Match(setupString, "FuelLevel: (.*) L");
+                if (setupFuelLevelMatch.Success && float.TryParse(setupFuelLevelMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var setupFuelLevel))
+                    SetupFuelLevel = setupFuelLevel;
+                
                 _yaml = _yaml.Substring(0, indexOfSetup);
             }
             
@@ -92,6 +99,8 @@ namespace iRacingSdkWrapper
             _yaml = _yaml.Replace("AbbrevName:  ,  ", "AbbrevName: Doe, John");
             _yaml = _yaml.Replace("AbbrevName:          ", "AbbrevName: Doe");
         }
+
+        public float SetupFuelLevel { get; set; }
 
         private void ParseYaml()
         {
