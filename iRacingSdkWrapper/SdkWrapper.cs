@@ -196,6 +196,12 @@ namespace iRacingSdkWrapper
         /// </summary>
         public void Start(Action<string> logger)
         {
+            if (IsRunning)
+            {
+                _logger?.Invoke($"iRacing SDK wrapper already running {_runCTSCount}");
+                return;
+            }
+            
             _logger = logger;
 
             lock (_runCtLock)
