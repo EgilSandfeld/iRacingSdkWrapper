@@ -441,7 +441,7 @@ namespace iRacingSdkWrapper
                         int waited = 0;
                         while (waited < ConnectSleepTime)
                         {
-                            Thread.Sleep(10);
+                            Thread.Sleep(100);
                             if (cts == null || cts.IsCancellationRequested)
                             {
                                 _logger?.Invoke($"iRacing SDK Wrapper sleep breaked runCT{_runCTSCount}");
