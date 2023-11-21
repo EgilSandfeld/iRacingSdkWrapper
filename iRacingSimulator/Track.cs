@@ -44,8 +44,7 @@ namespace iRacingSimulator
             {
                 var pctString = query["SectorNum", nr]["SectorStartPct"].GetValue();
                 float pct;
-                if (string.IsNullOrWhiteSpace(pctString) || !float.TryParse(pctString, NumberStyles.AllowDecimalPoint, 
-                    CultureInfo.InvariantCulture, out pct))
+                if (string.IsNullOrWhiteSpace(pctString) || !float.TryParse(pctString, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out pct))
                 {
                     break;
                 }
