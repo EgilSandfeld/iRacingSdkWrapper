@@ -96,8 +96,10 @@ namespace iRacingSdkWrapper
             }
             
             // AbbrevName missing name due to ??????????
-            _yaml = _yaml.Replace("AbbrevName:  ,  ", "AbbrevName: Doe, John");
-            _yaml = _yaml.Replace("AbbrevName:          ", "AbbrevName: Doe");
+            _yaml = Regex.Replace(_yaml, @"AbbrevName:\s*,?\s*(?=\r?\n)", "AbbrevName: ");
+            //_yaml = _yaml.Replace("AbbrevName:   ,  ", "AbbrevName: Doe, John");
+            //_yaml = _yaml.Replace("AbbrevName:  ,  ", "AbbrevName: Doe, John");
+            //_yaml = _yaml.Replace("AbbrevName:          ", "AbbrevName: Doe");
         }
 
         public float SetupFuelLevel { get; set; }
