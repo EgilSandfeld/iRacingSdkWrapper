@@ -101,7 +101,9 @@ namespace iRacingSdkWrapper
                                     this.TrackTemp,
                                     this.TrackTempCrew,
                                     this.RelativeHumidity,
+                                    this.Precipitation,
                                     this.WeatherType,
+                                    this.WeatherVersion,
                                     this.WindDir,
                                     this.WindVel,
                                     this.MGUKDeployAdapt,
@@ -663,8 +665,10 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> TrackTempCrew { get { return new TelemetryValue<float>(Sdk, "TrackTempCrew"); } }
 
         public TelemetryValue<float> RelativeHumidity { get { return new TelemetryValue<float>(Sdk, "RelativeHumidity"); } }
+        public TelemetryValue<float> Precipitation { get { return new TelemetryValue<float>(Sdk, "Precipitation"); } }
 
         public TelemetryValue<int> WeatherType { get { return new TelemetryValue<int>(Sdk, "WeatherType"); } }
+        public TelemetryValue<int> WeatherVersion { get { return new TelemetryValue<int>(Sdk, "WeatherVersion"); } }
 
         public TelemetryValue<float> WindDir { get { return new TelemetryValue<float>(Sdk, "WindDir"); } }
 
