@@ -667,9 +667,6 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> RelativeHumidity { get { return new TelemetryValue<float>(Sdk, "RelativeHumidity"); } }
         public TelemetryValue<float> Precipitation { get { return new TelemetryValue<float>(Sdk, "Precipitation"); } }
 
-        public TelemetryValue<int> WeatherType { get { return new TelemetryValue<int>(Sdk, "WeatherType"); } }
-        public TelemetryValue<int> WeatherVersion { get { return new TelemetryValue<int>(Sdk, "WeatherVersion"); } }
-
         public TelemetryValue<float> WindDir { get { return new TelemetryValue<float>(Sdk, "WindDir"); } }
 
         public TelemetryValue<float> WindVel { get { return new TelemetryValue<float>(Sdk, "WindVel"); } }
@@ -683,5 +680,7 @@ namespace iRacingSdkWrapper
         public TelemetryValue<TrackSurfaces> PlayerTrackSurface { get { return new TelemetryValue<TrackSurfaces>(Sdk, "PlayerTrackSurface"); } }
 
         public TelemetryValue<int> PlayerCarIdx { get { return new TelemetryValue<int>(Sdk, "PlayerCarIdx"); } }
+        public TelemetryValue<WeatherDynamics> WeatherType { get { return new TelemetryValue<WeatherDynamics>(Sdk, "WeatherType"); } }
+        public TelemetryValue<WeatherVersion> WeatherVersion { get { return new TelemetryValue<WeatherVersion>(Sdk, "WeatherVersion"); } }
     }
 }
