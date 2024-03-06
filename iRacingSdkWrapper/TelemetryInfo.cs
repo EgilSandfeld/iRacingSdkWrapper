@@ -102,8 +102,6 @@ namespace iRacingSdkWrapper
                                     this.TrackTempCrew,
                                     this.RelativeHumidity,
                                     this.Precipitation,
-                                    this.WeatherType,
-                                    this.WeatherVersion,
                                     this.WindDir,
                                     this.WindVel,
                                     this.MGUKDeployAdapt,
@@ -680,7 +678,5 @@ namespace iRacingSdkWrapper
         public TelemetryValue<TrackSurfaces> PlayerTrackSurface { get { return new TelemetryValue<TrackSurfaces>(Sdk, "PlayerTrackSurface"); } }
 
         public TelemetryValue<int> PlayerCarIdx { get { return new TelemetryValue<int>(Sdk, "PlayerCarIdx"); } }
-        public TelemetryValue<WeatherDynamics> WeatherType { get { return new TelemetryValue<WeatherDynamics>(Sdk, "WeatherType"); } }
-        public TelemetryValue<WeatherVersion> WeatherVersion { get { return new TelemetryValue<WeatherVersion>(Sdk, "WeatherVersion"); } }
     }
 }
