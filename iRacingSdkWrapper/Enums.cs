@@ -80,21 +80,16 @@
         PitSvTooFarBack = 103,
         PitSvBadAngle = 104,
         PitSvCantFixThat = 105
-    };
-    
-    public enum WeatherDynamics
-    {
-        SpecifiedFixedSky = 0, // specified weather / fixed sky
-        GeneratedSkyMoves,	  // generated weather / dynamic sky
-        GeneratedFixedSky,	  // generated weather / fixed sky
-        SpecifiedSkyMoves,	  // constant  weather / dynamic sky             
-    };
+    }
 
-    public enum WeatherVersion
+    public enum TrackWetness
     {
-        Classic,		// 0 : default init in replays prior to W2 being rolled out (no rain)
-        ForecastBased,	// 1 : usual way to handle realistic weather in W2
-        StaticTestDay, // 2 : W2 version of "WEATHER_DYNAMICS_GENERATED_FIXEDSKY" that adds possibility of track water
-        TimelineBased,	// 3 : a timeline of desired specific events in W2
-    };
+        Dry = 0,
+        Damp,
+        Wet,
+        Soaking,
+        Flooded,
+        A,
+        B
+    }
 }

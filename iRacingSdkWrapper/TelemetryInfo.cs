@@ -678,5 +678,9 @@ namespace iRacingSdkWrapper
         public TelemetryValue<TrackSurfaces> PlayerTrackSurface { get { return new TelemetryValue<TrackSurfaces>(Sdk, "PlayerTrackSurface"); } }
 
         public TelemetryValue<int> PlayerCarIdx { get { return new TelemetryValue<int>(Sdk, "PlayerCarIdx"); } }
+        
+        public TelemetryValue<bool> WeatherDeclaredWet { get { return new TelemetryValue<bool>(Sdk, "WeatherDeclaredWet"); } }
+        public TelemetryValue<TrackWetness> TrackWetness { get { return new TelemetryValue<TrackWetness>(Sdk, "TrackWetness"); } }
+
     }
 }
