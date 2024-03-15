@@ -1,4 +1,7 @@
-﻿namespace iRacingSdkWrapper
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace iRacingSdkWrapper
 {
     public enum TrackSurfaces
     {
@@ -81,15 +84,17 @@
         PitSvBadAngle = 104,
         PitSvCantFixThat = 105
     }
-
+    
+    [JsonConverter(typeof(StringEnumConverter))] 
     public enum TrackWetness
     {
-        Dry = 0,
-        Damp,
-        Wet,
-        Soaking,
-        Flooded,
-        A,
-        B
+        Unknown = 0, //irsdk_TrackWetness_UNKNOWN = 0,
+        Dry, //irsdk_TrackWetness_Dry,
+        SlightlyDamp, //irsdk_TrackWetness_MostlyDry,
+        Damp, //irsdk_TrackWetness_VeryLightlyWet,
+        SlightlyWet, //irsdk_TrackWetness_LightlyWet,
+        Wet, //irsdk_TrackWetness_ModeratelyWet,
+        VeryWet, //irsdk_TrackWetness_VeryWet,
+        Flooded, //irsdk_TrackWetness_ExtremelyWet
     }
 }

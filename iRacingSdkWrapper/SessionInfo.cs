@@ -92,6 +92,10 @@ namespace iRacingSdkWrapper
                 if (setupFuelLevelMatch.Success && float.TryParse(setupFuelLevelMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var setupFuelLevel))
                     SetupFuelLevel = setupFuelLevel;
                 
+                var setupTiresMatch = Regex.Match(setupString, "TireType: (.*)");
+                if (setupTiresMatch.Success)
+                    SetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+                
                 _yaml = _yaml.Substring(0, indexOfSetup);
             }
             
@@ -103,6 +107,7 @@ namespace iRacingSdkWrapper
         }
 
         public float SetupFuelLevel { get; set; }
+        public string SetupTires { get; set; }
 
         private void ParseYaml()
         {
