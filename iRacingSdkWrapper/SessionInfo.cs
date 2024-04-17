@@ -91,10 +91,12 @@ namespace iRacingSdkWrapper
                 var setupFuelLevelMatch = Regex.Match(setupString, "FuelLevel: (.*) L");
                 if (setupFuelLevelMatch.Success && float.TryParse(setupFuelLevelMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var setupFuelLevel))
                     SetupFuelLevel = setupFuelLevel;
-                
+#if RELEASE
+                THIS WILL FAIL: REMOVE THE #IF
                 var setupTiresMatch = Regex.Match(setupString, "TireType: (.*)");
                 if (setupTiresMatch.Success)
                     SetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+#endif
                 
                 _yaml = _yaml.Substring(0, indexOfSetup);
             }
