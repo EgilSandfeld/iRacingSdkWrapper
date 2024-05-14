@@ -210,7 +210,7 @@ namespace iRacingSdkWrapper
                 // Create new cancellation token and run the looper
                 _runCTS = new CancellationTokenSource();
                 _runCTSCount++;
-                Task.Run(() => Loop(_runCTS));
+                /*Task.Run(() => */Loop(_runCTS);//);
             }
 
             _logger?.Invoke($"iRacing SDK wrapper started {_runCTSCount}");
@@ -227,8 +227,8 @@ namespace iRacingSdkWrapper
                 return;
             }
 
-            lock (_runCtLock)
-            {
+            //lock (_runCtLock)
+            //{
                 _logger?.Invoke($"iRacing SDK wrapper stopping {_runCTSCount}");
                 if (_runCTS != null)
                 {
@@ -242,7 +242,7 @@ namespace iRacingSdkWrapper
                     _logger?.Invoke("iRacing SDK wrapper stopping No RunCT");
                 
                 _sdk?.Shutdown();
-            }
+            //}
             
             _logger?.Invoke($"iRacing SDK wrapper stopped runCT {_runCTSCount}");
 
@@ -322,6 +322,7 @@ namespace iRacingSdkWrapper
             
             while (!cts.IsCancellationRequested)
             {
+                bool hasMutex = false;
                 try
                 {
                     // Check if we can find the sim
@@ -330,7 +331,7 @@ namespace iRacingSdkWrapper
                         if (!_isConnected)
                         {
                             _isConnected = true;
-                            
+
                             // If this is the first time for the app but iRacing memory mapping file exists in memory, or a server change, restart the iRacing SDK, so we get the new server's memory mapping
                             if (hasConnected || _initialConnectingWithMemoryExisting)
                             {
@@ -339,7 +340,7 @@ namespace iRacingSdkWrapper
                                 _memoryFileExists = _sdk.Startup();
                                 _initialConnectingWithMemoryExisting = false;
                             }
-                            
+
                             _logger?.Invoke($"iRacing SDK Wrapper connected to iRacing runCT{_runCTSCount}");
                             RaiseEvent(OnConnectedDelegate, EventArgs.Empty);
                         }
@@ -347,7 +348,8 @@ namespace iRacingSdkWrapper
                         hasConnected = true;
 
                         _readMutex.WaitOne(8);
-
+                        hasMutex = true;
+                        
                         // Parse out your own driver Id
                         if (_driverId == -1)
                         {
@@ -362,9 +364,9 @@ namespace iRacingSdkWrapper
                         _telemetryInfo.Sdk = _sdk;
                         if (_telArgs == null)
                             _telArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time);
-                        else 
+                        else
                             _telArgs.Update(_telemetryInfo, time);
-                        
+
                         RaiseEvent(TelemetryUpdatedDelegate, _telArgs);
 
                         // Is the session info updated?
@@ -404,12 +406,12 @@ namespace iRacingSdkWrapper
                         _isConnected = false;
                         if (!_loggedFirst)
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup runCT{_runCTSCount}");
-                        
+
                         if (!hasConnected)
                             _memoryFileExists = _sdk.Startup();
 
-                        if (_memoryFileExists 
-                            && (_sdk.Header == null || _sdk.Header.VarCount == 0) 
+                        if (_memoryFileExists
+                            && (_sdk.Header == null || _sdk.Header.VarCount == 0)
                             && (!_loggedFirstConnecting || hasConnected))
                         {
                             RaiseEvent(OnConnectingDelegate, EventArgs.Empty);
@@ -419,7 +421,7 @@ namespace iRacingSdkWrapper
                             if (!hasConnected)
                                 _initialConnectingWithMemoryExisting = true;
                         }
-                        
+
                         if (!_loggedFirst)
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup hasConnected: {hasConnected} memoryFileExists: {_memoryFileExists}");
 
@@ -429,9 +431,9 @@ namespace iRacingSdkWrapper
                     // Sleep for a short amount of time until the next update is available
                     if (_isConnected || _sdk.Header?.Status == 1)
                     {
-                        if (_waitTime <= 0 || _waitTime > 1000) 
+                        if (_waitTime <= 0 || _waitTime > 1000)
                             _waitTime = 15;
-                    
+
                         Thread.Sleep(_waitTime);
                     }
                     else
@@ -447,7 +449,7 @@ namespace iRacingSdkWrapper
                                 _logger?.Invoke($"iRacing SDK Wrapper sleep breaked runCT{_runCTSCount}");
                                 break;
                             }
-                            
+
                             waited += 10;
                         }
                     }
@@ -467,6 +469,11 @@ namespace iRacingSdkWrapper
                         _logger?.Invoke("iRacing SDK Wrapper error file: " + outPath);
                         break;
                     }
+                }
+                finally
+                {
+                    if (hasMutex)
+                        _readMutex.ReleaseMutex();
                 }
             }
 
@@ -577,6 +584,7 @@ namespace iRacingSdkWrapper
             
             _logger?.Invoke("iRacing SDK wrapper Dispose runCT" + _runCTSCount);
             _runCTS.Cancel();
+            _readMutex?.Dispose();
         }
 
         #endregion
