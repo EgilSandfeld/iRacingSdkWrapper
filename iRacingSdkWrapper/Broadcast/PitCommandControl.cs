@@ -21,12 +21,21 @@ namespace iRacingSdkWrapper.Broadcast
         /// <param name="amount">The amount of fuel (in liters) to add. Use 0 to leave at current value.</param>
         public void AddFuel(int amount)
         {
-            Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.Fuel, amount, 0);
+            Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.Fuel, amount);
         }
 
         private void ChangeTire(PitCommandModeTypes type, int pressure)
         {
             Broadcast(BroadcastMessageTypes.PitCommand, (int)type, pressure);
+        }
+        
+        /// <summary>
+        /// UNTESTED - Check whether this uses 0-based or 1-based index.
+        /// </summary>
+        /// <param name="tireCompoundIndex"></param>
+        public void ChangeTireCompound(int tireCompoundIndex)
+        {
+            Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.TC, tireCompoundIndex);
         }
 
         /// <summary>
@@ -80,6 +89,30 @@ namespace iRacingSdkWrapper.Broadcast
             Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.ClearTires, 0);
         }
 
+        /// <summary>
+        /// Clear fuel (unchecks 'Begin Fueling').
+        /// </summary>
+        public void ClearFuel()
+        {
+            Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.ClearFuel, 0);
+        }
+
+        /// <summary>
+        /// Clear fast repair enabled.
+        /// </summary>
+        public void ClearFastRepair()
+        {
+            Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.ClearFR, 0);
+        }
+
+        /// <summary>
+        /// Clear windshield clean enabled.
+        /// </summary>
+        public void ClearWindshield()
+        {
+            Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.ClearWS, 0);
+        }
+
         public class Tire
         {
             internal Tire() { }
@@ -113,7 +146,5 @@ namespace iRacingSdkWrapper.Broadcast
             public Tire LeftRear { get; set; }
             public Tire RightRear { get; set; }
         }
-
-
     }
 }
