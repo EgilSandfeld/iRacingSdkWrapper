@@ -337,7 +337,7 @@ namespace iRacingSdkWrapper
                             {
                                 _logger?.Invoke($"iRacing SDK Wrapper restarting runCT{_runCTSCount}");
                                 _sdk?.Shutdown();
-                                _memoryFileExists = _sdk.Startup();
+                                _memoryFileExists = _sdk.Startup(cts.Token);
                                 _initialConnectingWithMemoryExisting = false;
                             }
 
@@ -408,7 +408,7 @@ namespace iRacingSdkWrapper
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup runCT{_runCTSCount}");
 
                         if (!hasConnected)
-                            _memoryFileExists = _sdk.Startup();
+                            _memoryFileExists = _sdk.Startup(cts.Token);
 
                         if (_memoryFileExists
                             && (_sdk.Header == null || _sdk.Header.VarCount == 0)

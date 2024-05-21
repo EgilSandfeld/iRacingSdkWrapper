@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO.MemoryMappedFiles;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 
 namespace iRSDKSharp
@@ -81,7 +82,7 @@ namespace iRSDKSharp
         }
 
         
-        public bool Startup()
+        public bool Startup(CancellationToken token)
         {
             if (IsInitialized)
                 return true;
@@ -98,7 +99,13 @@ namespace iRSDKSharp
 
                 var wh = new WaitHandle[1];
                 wh[0] = are;
-                WaitHandle.WaitAny(wh);
+                Task.Run(() =>
+                {
+                    var index = WaitHandle.WaitAny(new[] { wh[0], token.WaitHandle });
+                    if (index == 1)
+                        throw new OperationCanceledException(token);
+                    
+                }, token);
 
                 Header = new CiRSDKHeader(FileMapView);
                 GetVarHeaders();
