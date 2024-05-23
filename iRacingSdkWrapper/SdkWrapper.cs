@@ -210,7 +210,7 @@ namespace iRacingSdkWrapper
                 // Create new cancellation token and run the looper
                 _runCTS = new CancellationTokenSource();
                 _runCTSCount++;
-                /*Task.Run(() => */Loop(_runCTS);//);
+                /*Task.Run(() => */Loop();//);
             }
 
             _logger?.Invoke($"iRacing SDK wrapper started {_runCTSCount}");
@@ -308,21 +308,21 @@ namespace iRacingSdkWrapper
         }
         
 
-        private void Loop(CancellationTokenSource cts)
+        private void Loop()
         {
             _logger?.Invoke($"iRacing SDK Loop with runCT{_runCTSCount}");
             int lastUpdate = -1;
             bool hasConnected = false;
             int tries = 0;
 
-            if (cts == null || cts.IsCancellationRequested)
+            if (_runCTS == null || _runCTS.IsCancellationRequested)
             {
                 _logger?.Invoke($"iRacing SDK Wrapper connection stopped by runCT{_runCTSCount} too early");
             }
             
-            while (!cts.IsCancellationRequested)
+            while (_runCTS != null && !_runCTS.IsCancellationRequested)
             {
-                bool hasMutex = false;
+                var hasMutex = false;
                 try
                 {
                     // Check if we can find the sim
@@ -337,7 +337,7 @@ namespace iRacingSdkWrapper
                             {
                                 _logger?.Invoke($"iRacing SDK Wrapper restarting runCT{_runCTSCount}");
                                 _sdk?.Shutdown();
-                                _memoryFileExists = _sdk.Startup(cts.Token);
+                                _memoryFileExists = _sdk.Startup(_runCTS.Token);
                                 _initialConnectingWithMemoryExisting = false;
                             }
 
@@ -408,7 +408,7 @@ namespace iRacingSdkWrapper
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup runCT{_runCTSCount}");
 
                         if (!hasConnected)
-                            _memoryFileExists = _sdk.Startup(cts.Token);
+                            _memoryFileExists = _sdk.Startup(_runCTS.Token);
 
                         if (_memoryFileExists
                             && (_sdk.Header == null || _sdk.Header.VarCount == 0)
@@ -444,7 +444,7 @@ namespace iRacingSdkWrapper
                         while (waited < ConnectSleepTime)
                         {
                             Thread.Sleep(100);
-                            if (cts == null || cts.IsCancellationRequested)
+                            if (_runCTS == null || _runCTS.IsCancellationRequested)
                             {
                                 _logger?.Invoke($"iRacing SDK Wrapper sleep breaked runCT{_runCTSCount}");
                                 break;
@@ -477,7 +477,7 @@ namespace iRacingSdkWrapper
                 }
             }
 
-            if (cts == null || cts.IsCancellationRequested)
+            if (_runCTS == null || _runCTS.IsCancellationRequested)
             {
                 _isConnected = false;
                 _logger?.Invoke($"iRacing SDK Wrapper connection stopped by token runCT{_runCTSCount}");
