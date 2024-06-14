@@ -351,9 +351,10 @@ namespace iRacingSdkWrapper
                         hasMutex = true;
                         
                         // Parse out your own driver Id
+                        var newPlayerCarIdx = (int)_sdk.GetData(PlayerCarIdx);
                         if (_driverId == -1)
                         {
-                            _driverId = (int)_sdk.GetData(PlayerCarIdx);
+                            _driverId = newPlayerCarIdx;
                             //_logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId}");
                         }
 
@@ -378,9 +379,9 @@ namespace iRacingSdkWrapper
 
                             //Force check Player Car Id again, to be sure when crossing from warm up practice -> race server practice, that the ID updates.
                             //This is required since iRacing is not shut down inbetween session changes, thus never gets to set DriverId to -1
-                            if (_driverId != -1 && _driverId != (int)_sdk.GetData(PlayerCarIdx))
+                            if (_driverId != -1 && _driverId != newPlayerCarIdx)
                             {
-                                _driverId = (int)_sdk.GetData(PlayerCarIdx);
+                                _driverId = newPlayerCarIdx;
                                 //_logger?.Invoke($"iRacing SDK Wrapper found updated player car id {_driverId}");
                             }
 
