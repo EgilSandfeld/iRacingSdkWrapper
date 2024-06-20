@@ -94,7 +94,21 @@ namespace iRacingSdkWrapper
                 
                 var setupTiresMatch = Regex.Match(setupString, "TireType: (.*)");
                 if (setupTiresMatch.Success)
-                    SetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+                {
+                    var newSetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+                    if (!string.IsNullOrEmpty(newSetupTires))
+                        SetupTires = newSetupTires;
+                }
+                else
+                {
+                    setupTiresMatch = Regex.Match(setupString, "TireCompound: (.*)");
+                    if (setupTiresMatch.Success)
+                    {
+                        var newSetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+                        if (!string.IsNullOrEmpty(newSetupTires))
+                            SetupTires = newSetupTires;
+                    }
+                }
                 
                 _yaml = _yaml.Substring(0, indexOfSetup);
             }
