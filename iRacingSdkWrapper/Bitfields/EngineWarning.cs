@@ -2,7 +2,7 @@
 
 namespace iRacingSdkWrapper.Bitfields
 {
-    public class EngineWarning : BitfieldBase<EngineWarnings>
+    public class EngineWarning : BitfieldBase<IRacingEngineWarnings>
     {
         public EngineWarning(int value)
             : base(value)
@@ -11,7 +11,7 @@ namespace iRacingSdkWrapper.Bitfields
     }
 
     [Flags]
-    public enum EngineWarnings : uint
+    public enum IRacingEngineWarnings : uint
     {
         WaterTemperatureWarning = 0x01,
         FuelPressureWarning = 0x02,

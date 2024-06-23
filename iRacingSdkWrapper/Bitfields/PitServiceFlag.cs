@@ -5,7 +5,7 @@ using System.Text;
 
 namespace iRacingSdkWrapper.Bitfields
 {
-    public class PitServiceFlag : BitfieldBase<PitServiceFlags>
+    public class PitServiceFlag : BitfieldBase<IRacingPitServiceFlags>
     {
         public PitServiceFlag() : this(0) { }
 
@@ -14,7 +14,7 @@ namespace iRacingSdkWrapper.Bitfields
     }
 
     [Flags]
-    public enum PitServiceFlags : uint
+    public enum IRacingPitServiceFlags : uint
     {
         LFTireChange = 0x0001,
         RFTireChange = 0x0002,

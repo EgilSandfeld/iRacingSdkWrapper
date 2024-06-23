@@ -2,7 +2,7 @@
 
 namespace iRacingSdkWrapper.Bitfields
 {
-    public class SessionFlag : BitfieldBase<SessionFlags>
+    public class SessionFlag : BitfieldBase<IRacingSessionFlags>
     {
         public SessionFlag(int value) : base(value)
         {
@@ -10,7 +10,7 @@ namespace iRacingSdkWrapper.Bitfields
     }
 
     [Flags]
-    public enum SessionFlags : uint
+    public enum IRacingSessionFlags : uint
     {
         Checkered = 0x00000001,
         White = 0x00000002,

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace iRacingSdkWrapper.Bitfields
 {
-    public class CameraState : BitfieldBase<CameraStates>
+    public class CameraState : BitfieldBase<IRacingCameraStates>
     {
         public CameraState() : this(0) { }
 
@@ -13,7 +13,7 @@ namespace iRacingSdkWrapper.Bitfields
     }
 
     [Flags]
-    public enum CameraStates : uint
+    public enum IRacingCameraStates : uint
     {
         IsSessionScreen = 0x0001, // the camera tool can only be activated if viewing the session screen (out of car)
         IsScenicActive = 0x0002, // the scenic camera is active (no focus car)

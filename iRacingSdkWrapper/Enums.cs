@@ -3,7 +3,7 @@ using Newtonsoft.Json.Converters;
 
 namespace iRacingSdkWrapper
 {
-    public enum TrackSurfaces
+    public enum IRacingTrackSurfaces
     {
         NotInWorld = -1,
         OffTrack,
@@ -12,7 +12,7 @@ namespace iRacingSdkWrapper
         OnTrack
     }
     
-    public enum TrackSurfaceMaterials
+    public enum IRacingTrackSurfaceMaterials
     {
         SurfaceNotInWorld = -1,
         Undefined = 0,
@@ -47,7 +47,7 @@ namespace iRacingSdkWrapper
         Astroturf,
     }
 
-    public enum SessionStates
+    public enum IRacingSessionStates
     {
         Invalid,
         GetInCar,
@@ -58,7 +58,7 @@ namespace iRacingSdkWrapper
         CoolDown
     }
 
-    public enum CarLeftRights
+    public enum IRacingCarLeftRights
     {
         LROff,
         LRClear, // no cars around us.
@@ -69,7 +69,7 @@ namespace iRacingSdkWrapper
         LR2CarsRight // there are two cars to our right.
     }
 
-    public enum PitSvStatuses
+    public enum IRacingPitSvStatuses
     {
         // status 
         PitSvNone = 0,
@@ -86,7 +86,7 @@ namespace iRacingSdkWrapper
     }
     
     [JsonConverter(typeof(StringEnumConverter))] 
-    public enum TrackWetness
+    public enum IRacingTrackWetness
     {
         Unknown = 0, //irsdk_TrackWetness_UNKNOWN = 0,
         Dry, //irsdk_TrackWetness_Dry,

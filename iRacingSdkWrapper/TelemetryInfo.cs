@@ -34,11 +34,6 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> TorqueMGUK { get { return new TelemetryValue<float>(Sdk, "TorqueMGU_K"); } }
 
         /// <summary>
-        /// Current DRS status. 0 = inactive, 1 = can be activated in next DRS zone, 2 = can be activated now, 3 = active.
-        /// </summary>
-        public TelemetryValue<int> DrsStatus { get { return new TelemetryValue<int>(Sdk, "DRS_Status"); } }
-
-        /// <summary>
         /// The number of laps you have completed. Note: on Nordschleife Tourist layout, you can complete a lap without starting a new one!
         /// </summary>
         public TelemetryValue<int> LapCompleted { get { return new TelemetryValue<int>(Sdk, "LapCompleted"); } }
@@ -59,7 +54,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Session state. Unit: irsdk_SessionState
         /// </summary>
-        public TelemetryValue<SessionStates> SessionState { get { return new TelemetryValue<SessionStates>(Sdk, "SessionState"); } }
+        public TelemetryValue<IRacingSessionStates> SessionState { get { return new TelemetryValue<IRacingSessionStates>(Sdk, "SessionState"); } }
 
 
         /// <summary>
@@ -77,7 +72,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Pit service status flags. Unit: irsdk_PitSvStatus
         /// </summary>
-        public TelemetryValue<PitSvStatuses> PitSvStatuses { get { return new TelemetryValue<PitSvStatuses>(Sdk, "PlayerCarPitSvStatus"); } }
+        public TelemetryValue<IRacingPitSvStatuses> PitSvStatuses { get { return new TelemetryValue<IRacingPitSvStatuses>(Sdk, "PlayerCarPitSvStatus"); } }
 
 
         /// <summary>
@@ -89,7 +84,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Car Left Right. Unit: irsdk_CarLeftRight
         /// </summary>
-        public TelemetryValue<CarLeftRights> CarLeftRights { get { return new TelemetryValue<CarLeftRights>(Sdk, "CarLeftRight"); } }
+        public TelemetryValue<IRacingCarLeftRights> CarLeftRights { get { return new TelemetryValue<IRacingCarLeftRights>(Sdk, "CarLeftRight"); } }
 
 
         /// <summary>
@@ -129,13 +124,13 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Track surface type by car index. Unit: irsdk_TrkLoc
         /// </summary>
-        public TelemetryValue<TrackSurfaces[]> CarIdxTrackSurface { get { return new TelemetryValue<TrackSurfaces[]>(Sdk, "CarIdxTrackSurface"); } }
+        public TelemetryValue<IRacingTrackSurfaces[]> CarIdxTrackSurface { get { return new TelemetryValue<IRacingTrackSurfaces[]>(Sdk, "CarIdxTrackSurface"); } }
         
         
         /// <summary>
         /// Track surface material type by car index. Unit: irsdk_TrkSurf
         /// </summary>
-        public TelemetryValue<TrackSurfaceMaterials[]> CarIdxTrackSurfaceMaterial { get { return new TelemetryValue<TrackSurfaceMaterials[]>(Sdk, "CarIdxTrackSurfaceMaterial"); } }
+        public TelemetryValue<IRacingTrackSurfaceMaterials[]> CarIdxTrackSurfaceMaterial { get { return new TelemetryValue<IRacingTrackSurfaceMaterials[]>(Sdk, "CarIdxTrackSurfaceMaterial"); } }
 
 
         /// <summary>
@@ -165,7 +160,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Session flags by car index
         /// </summary>
-        public TelemetryValue<SessionFlags[]> CarIdxSessionFlags { get { return new TelemetryValue<SessionFlags[]>(Sdk, "CarIdxSessionFlags"); } }
+        public TelemetryValue<IRacingSessionFlags[]> CarIdxSessionFlags { get { return new TelemetryValue<IRacingSessionFlags[]>(Sdk, "CarIdxSessionFlags"); } }
 
         /// <summary>
         /// Race time behind leader or fastest lap time otherwise
@@ -567,12 +562,12 @@ namespace iRacingSdkWrapper
 
         public TelemetryValue<int> PlayerCarDriverIncidentCount { get { return new TelemetryValue<int>(Sdk, "PlayerCarDriverIncidentCount"); } }
 
-        public TelemetryValue<TrackSurfaces> PlayerTrackSurface { get { return new TelemetryValue<TrackSurfaces>(Sdk, "PlayerTrackSurface"); } }
+        public TelemetryValue<IRacingTrackSurfaces> PlayerTrackSurface { get { return new TelemetryValue<IRacingTrackSurfaces>(Sdk, "PlayerTrackSurface"); } }
 
         public TelemetryValue<int> PlayerCarIdx { get { return new TelemetryValue<int>(Sdk, "PlayerCarIdx"); } }
         
         public TelemetryValue<bool> WeatherDeclaredWet { get { return new TelemetryValue<bool>(Sdk, "WeatherDeclaredWet"); } }
-        public TelemetryValue<TrackWetness> TrackWetness { get { return new TelemetryValue<TrackWetness>(Sdk, "TrackWetness"); } }
+        public TelemetryValue<IRacingTrackWetness> TrackWetness { get { return new TelemetryValue<IRacingTrackWetness>(Sdk, "TrackWetness"); } }
 
         public TelemetryValue<float> LFwearL { get { return new TelemetryValue<float>(Sdk, "LFwearL"); } }
         public TelemetryValue<float> LFwearM { get { return new TelemetryValue<float>(Sdk, "LFwearM"); } }
@@ -637,6 +632,10 @@ namespace iRacingSdkWrapper
         
         public TelemetryValue<int> PlayerCarDryTireSetLimit { get { return new TelemetryValue<int>(Sdk, "PlayerCarDryTireSetLimit"); } }
         public TelemetryValue<int> PitSvTireCompound { get { return new TelemetryValue<int>(Sdk, "PitSvTireCompound"); } }
+        
+        /// <summary>
+        /// Current DRS status. 0 = inactive, 1 = can be activated in next DRS zone, 2 = can be activated now, 3 = active.
+        /// </summary>
         public TelemetryValue<int> DRSStatus { get { return new TelemetryValue<int>(Sdk, "DRS_Status"); } }
         public TelemetryValue<int> DRSCount { get { return new TelemetryValue<int>(Sdk, "DRS_Count"); } }
         public TelemetryValue<int> EnterExitReset { get { return new TelemetryValue<int>(Sdk, "EnterExitReset"); } }
