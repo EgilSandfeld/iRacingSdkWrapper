@@ -16,7 +16,7 @@ namespace iRacingSdkWrapper
             Sdk = sdk;
         }
 
-        public IEnumerable<TelemetryValue> GetValues()
+        /*public IEnumerable<TelemetryValue> GetValues()
         {
             var values = new List<TelemetryValue>();
             values.AddRange(new TelemetryValue[]
@@ -122,7 +122,7 @@ namespace iRacingSdkWrapper
                                     this.PlayerCarIdx
                                 });
             return values;
-        }
+        }*/
 
         public TelemetryValue<float> MGUKDeployAdapt { get { return new TelemetryValue<float>(Sdk, "dcMGUKDeployAdapt"); } }
 
