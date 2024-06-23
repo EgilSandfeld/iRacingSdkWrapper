@@ -613,6 +613,7 @@ namespace iRacingSdkWrapper
         /// Engine coolant level. Unit: l
         /// </summary>
         public TelemetryValue<float> WaterLevel { get { return new TelemetryValue<float>(Sdk, "WaterLevel"); } }
+        public TelemetryValue<float> ManifoldPress { get { return new TelemetryValue<float>(Sdk, "ManifoldPress"); } }
 
 
         /// <summary>
@@ -682,5 +683,130 @@ namespace iRacingSdkWrapper
         public TelemetryValue<bool> WeatherDeclaredWet { get { return new TelemetryValue<bool>(Sdk, "WeatherDeclaredWet"); } }
         public TelemetryValue<TrackWetness> TrackWetness { get { return new TelemetryValue<TrackWetness>(Sdk, "TrackWetness"); } }
 
+        public TelemetryValue<float> LFwearL { get { return new TelemetryValue<float>(Sdk, "LFwearL"); } }
+        public TelemetryValue<float> LFwearM { get { return new TelemetryValue<float>(Sdk, "LFwearM"); } }
+        public TelemetryValue<float> LFwearR { get { return new TelemetryValue<float>(Sdk, "LFwearR"); } }
+        public TireWear LFWear => new TireWear(LFwearL, LFwearM, LFwearR);
+
+        public TelemetryValue<float> RFwearL { get { return new TelemetryValue<float>(Sdk, "RFwearL"); } }
+        public TelemetryValue<float> RFwearM { get { return new TelemetryValue<float>(Sdk, "RFwearM"); } }
+        public TelemetryValue<float> RFwearR { get { return new TelemetryValue<float>(Sdk, "RFwearR"); } }
+        public TireWear RFWear => new TireWear(RFwearL, RFwearM, RFwearR);
+
+        public TelemetryValue<float> LRwearL { get { return new TelemetryValue<float>(Sdk, "LRwearL"); } }
+        public TelemetryValue<float> LRwearM { get { return new TelemetryValue<float>(Sdk, "LRwearM"); } }
+        public TelemetryValue<float> LRwearR { get { return new TelemetryValue<float>(Sdk, "LRwearR"); } }
+        public TireWear LRWear => new TireWear(LRwearL, LRwearM, LRwearR);
+
+        public TelemetryValue<float> RRwearL { get { return new TelemetryValue<float>(Sdk, "RRwearL"); } }
+        public TelemetryValue<float> RRwearM { get { return new TelemetryValue<float>(Sdk, "RRwearM"); } }
+        public TelemetryValue<float> RRwearR { get { return new TelemetryValue<float>(Sdk, "RRwearR"); } }
+        public TireWear RRWear => new TireWear(RRwearL, RRwearM, RRwearR);
+        
+        public TelemetryValue<float> LFcoldPressure { get { return new TelemetryValue<float>(Sdk, "LFcoldPressure"); } }
+        public TelemetryValue<float> RFcoldPressure { get { return new TelemetryValue<float>(Sdk, "RFcoldPressure"); } }
+        public TelemetryValue<float> LRcoldPressure { get { return new TelemetryValue<float>(Sdk, "LRcoldPressure"); } }
+        public TelemetryValue<float> RRcoldPressure { get { return new TelemetryValue<float>(Sdk, "RRcoldPressure"); } }
+        
+        public TelemetryValue<float> dpLFTireColdPress { get { return new TelemetryValue<float>(Sdk, "dpLFTireColdPress"); } }
+        public TelemetryValue<float> dpRFTireColdPress { get { return new TelemetryValue<float>(Sdk, "dpRFTireColdPress"); } }
+        public TelemetryValue<float> dpLRTireColdPress { get { return new TelemetryValue<float>(Sdk, "dpLRTireColdPress"); } }
+        public TelemetryValue<float> dpRRTireColdPress { get { return new TelemetryValue<float>(Sdk, "dpRRTireColdPress"); } }
+        
+        public TelemetryValue<float> dpTireChange { get { return new TelemetryValue<float>(Sdk, "dpTireChange"); } }
+        
+        public TelemetryValue<float> dpLFTireChange { get { return new TelemetryValue<float>(Sdk, "dpLFTireChange"); } }
+        public TelemetryValue<float> dpRFTireChange { get { return new TelemetryValue<float>(Sdk, "dpRFTireChange"); } }
+        public TelemetryValue<float> dpLRTireChange { get { return new TelemetryValue<float>(Sdk, "dpLRTireChange"); } }
+        public TelemetryValue<float> dpRRTireChange { get { return new TelemetryValue<float>(Sdk, "dpRRTireChange"); } }
+        
+        public TelemetryValue<float> PitSvLFP { get { return new TelemetryValue<float>(Sdk, "PitSvLFP"); } }
+        public TelemetryValue<float> PitSvRFP { get { return new TelemetryValue<float>(Sdk, "PitSvRFP"); } }
+        public TelemetryValue<float> PitSvLRP { get { return new TelemetryValue<float>(Sdk, "PitSvLRP"); } }
+        public TelemetryValue<float> PitSvRRP { get { return new TelemetryValue<float>(Sdk, "PitSvRRP"); } }
+        
+        public TelemetryValue<float> dpFuelAddKg { get { return new TelemetryValue<float>(Sdk, "dpFuelAddKg"); } }
+        public TelemetryValue<float> dpFuelFill { get { return new TelemetryValue<float>(Sdk, "dpFuelFill"); } }
+        public TelemetryValue<float> dpWindshieldTearoff { get { return new TelemetryValue<float>(Sdk, "dpWindshieldTearoff"); } }
+        public TelemetryValue<float> dpFastRepair { get { return new TelemetryValue<float>(Sdk, "dpFastRepair"); } }
+        
+        public TelemetryValue<float> PitOptRepairLeft { get { return new TelemetryValue<float>(Sdk, "PitOptRepairLeft"); } }
+        public TelemetryValue<float> PitRepairLeft { get { return new TelemetryValue<float>(Sdk, "PitRepairLeft"); } }
+        public TelemetryValue<float> PitSvFuel { get { return new TelemetryValue<float>(Sdk, "PitSvFuel"); } }
+        public TelemetryValue<float> dcBrakeBias { get { return new TelemetryValue<float>(Sdk, "dcBrakeBias"); } }
+        public TelemetryValue<float> dcTractionControl { get { return new TelemetryValue<float>(Sdk, "dcTractionControl"); } }
+        public TelemetryValue<float> dcABS { get { return new TelemetryValue<float>(Sdk, "dcABS"); } }
+        public TelemetryValue<float> SessionTimeOfDay { get { return new TelemetryValue<float>(Sdk, "SessionTimeOfDay"); } }
+        
+        public TelemetryValue<float> LapDeltaToSessionLastlLap { get { return new TelemetryValue<float>(Sdk, "LapDeltaToSessionLastlLap"); } }
+        public TelemetryValue<float> LapDeltaToSessionBestLap { get { return new TelemetryValue<float>(Sdk, "LapDeltaToSessionBestLap"); } }
+        public TelemetryValue<bool> LapDeltaToSessionBestLap_OK { get { return new TelemetryValue<bool>(Sdk, "LapDeltaToSessionBestLap_OK"); } }
+        public TelemetryValue<float> LapBestLapTime { get { return new TelemetryValue<float>(Sdk, "LapBestLapTime"); } }
+        public TelemetryValue<float> LapLastLapTime { get { return new TelemetryValue<float>(Sdk, "LapLastLapTime"); } }
+        
+        public TelemetryValue<int> PlayerCarDryTireSetLimit { get { return new TelemetryValue<int>(Sdk, "PlayerCarDryTireSetLimit"); } }
+        public TelemetryValue<int> PitSvTireCompound { get { return new TelemetryValue<int>(Sdk, "PitSvTireCompound"); } }
+        public TelemetryValue<int> DRS_Status { get { return new TelemetryValue<int>(Sdk, "DRS_Status"); } }
+        public TelemetryValue<int> DRS_Count { get { return new TelemetryValue<int>(Sdk, "DRS_Count"); } }
+        public TelemetryValue<int> EnterExitReset { get { return new TelemetryValue<int>(Sdk, "EnterExitReset"); } }
+        public TelemetryValue<int> FastRepairUsed { get { return new TelemetryValue<int>(Sdk, "FastRepairUsed"); } }
+        public TelemetryValue<int> FastRepairAvailable { get { return new TelemetryValue<int>(Sdk, "FastRepairAvailable"); } }
+        
+        public TelemetryValue<int> LFTiresAvailable { get { return new TelemetryValue<int>(Sdk, "LFTiresAvailable"); } }
+        public TelemetryValue<int> RFTiresAvailable { get { return new TelemetryValue<int>(Sdk, "RFTiresAvailable"); } }
+        public TelemetryValue<int> LRTiresAvailable { get { return new TelemetryValue<int>(Sdk, "LRTiresAvailable"); } }
+        public TelemetryValue<int> RRTiresAvailable { get { return new TelemetryValue<int>(Sdk, "RRTiresAvailable"); } }
+        
+        public TelemetryValue<int> LFTiresUsed { get { return new TelemetryValue<int>(Sdk, "LFTiresUsed"); } }
+        public TelemetryValue<int> RFTiresUsed { get { return new TelemetryValue<int>(Sdk, "RFTiresUsed"); } }
+        public TelemetryValue<int> LRTiresUsed { get { return new TelemetryValue<int>(Sdk, "LRTiresUsed"); } }
+        public TelemetryValue<int> RRTiresUsed { get { return new TelemetryValue<int>(Sdk, "RRTiresUsed"); } }
+        
+        public TelemetryValue<int> LeftTireSetsUsed { get { return new TelemetryValue<int>(Sdk, "LeftTireSetsUsed"); } }
+        public TelemetryValue<int> RightTireSetsUsed { get { return new TelemetryValue<int>(Sdk, "RightTireSetsUsed"); } }
+        public TelemetryValue<int> FrontTireSetsUsed { get { return new TelemetryValue<int>(Sdk, "FrontTireSetsUsed"); } }
+        public TelemetryValue<int> RearTireSetsUsed { get { return new TelemetryValue<int>(Sdk, "RearTireSetsUsed"); } }
+        
+        public TelemetryValue<int> TireSetsUsed { get { return new TelemetryValue<int>(Sdk, "RearTireSetsUsed"); } }
+        
+        public TelemetryValue<int> TireSetsAvailable { get { return new TelemetryValue<int>(Sdk, "TireSetsAvailable"); } }
+        
+        public TelemetryValue<int> LeftTireSetsAvailable { get { return new TelemetryValue<int>(Sdk, "LeftTireSetsAvailable"); } }
+        public TelemetryValue<int> RightTireSetsAvailable { get { return new TelemetryValue<int>(Sdk, "RightTireSetsAvailable"); } }
+        public TelemetryValue<int> FrontTireSetsAvailable { get { return new TelemetryValue<int>(Sdk, "FrontTireSetsAvailable"); } }
+        public TelemetryValue<int> RearTireSetsAvailable { get { return new TelemetryValue<int>(Sdk, "RearTireSetsAvailable"); } }
+        
+        public TelemetryValue<int> DisplayUnits { get { return new TelemetryValue<int>(Sdk, "DisplayUnits"); } }
+        public TelemetryValue<int> SessionLapsRemainEx { get { return new TelemetryValue<int>(Sdk, "SessionLapsRemainEx"); } }
+        public TelemetryValue<int> PlayerCarPosition { get { return new TelemetryValue<int>(Sdk, "PlayerCarPosition"); } }
+        public TelemetryValue<int> PlayerCarClassPosition { get { return new TelemetryValue<int>(Sdk, "PlayerCarClassPosition"); } }
+        public TelemetryValue<int> LapBestLap { get { return new TelemetryValue<int>(Sdk, "LapBestLap"); } }
+        public TelemetryValue<int> RadioTransmitCarIdx { get { return new TelemetryValue<int>(Sdk, "RadioTransmitCarIdx"); } }
+        public TelemetryValue<int> RadioTransmitRadioIdx { get { return new TelemetryValue<int>(Sdk, "RadioTransmitRadioIdx"); } }
+        public TelemetryValue<int> RadioTransmitFrequencyIdx { get { return new TelemetryValue<int>(Sdk, "RadioTransmitFrequencyIdx"); } }
+        public TelemetryValue<bool> PitsOpen { get { return new TelemetryValue<bool>(Sdk, "PitsOpen"); } }
+        public TelemetryValue<bool> BrakeABSactive { get { return new TelemetryValue<bool>(Sdk, "BrakeABSactive"); } }
+        public TelemetryValue<bool> dcTriggerWindshieldWipers { get { return new TelemetryValue<bool>(Sdk, "dcTriggerWindshieldWipers"); } }
+        public TelemetryValue<bool> dcToggleWindshieldWipers { get { return new TelemetryValue<bool>(Sdk, "dcToggleWindshieldWipers"); } }
+        public TelemetryValue<bool> IsDiskLoggingActive { get { return new TelemetryValue<bool>(Sdk, "IsDiskLoggingActive"); } }
+        public TelemetryValue<bool> IsDiskLoggingEnabled { get { return new TelemetryValue<bool>(Sdk, "IsDiskLoggingEnabled"); } }
+        public TelemetryValue<bool> PitstopActive { get { return new TelemetryValue<bool>(Sdk, "PitstopActive"); } }
+        public TelemetryValue<bool> PlayerCarInPitStall { get { return new TelemetryValue<bool>(Sdk, "PlayerCarInPitStall"); } }
+        public TelemetryValue<bool> IsOnTrackCar { get { return new TelemetryValue<bool>(Sdk, "IsOnTrackCar"); } }
+        public TelemetryValue<bool> OnPitRoad { get { return new TelemetryValue<bool>(Sdk, "OnPitRoad"); } }
+    }
+
+    public class TireWear
+    {
+        public TelemetryValue<float> Left { get; set; }
+        public TelemetryValue<float> Middle { get; set; }
+        public TelemetryValue<float> Right { get; set; }
+        
+        public TireWear(TelemetryValue<float> left, TelemetryValue<float> middle, TelemetryValue<float> right)
+        {
+            Left = left;
+            Middle = middle;
+            Right = right;
+        }
     }
 }
