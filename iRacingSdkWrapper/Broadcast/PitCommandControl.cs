@@ -111,7 +111,7 @@ namespace iRacingSdkWrapper.Broadcast
 
         public class Tire
         {
-            internal Tire() { }
+            public Tire() { }
 
             /// <summary>
             /// Whether or not to change this tire.
