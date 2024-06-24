@@ -572,22 +572,18 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> LFwearL { get { return new TelemetryValue<float>(Sdk, "LFwearL"); } }
         public TelemetryValue<float> LFwearM { get { return new TelemetryValue<float>(Sdk, "LFwearM"); } }
         public TelemetryValue<float> LFwearR { get { return new TelemetryValue<float>(Sdk, "LFwearR"); } }
-        public TireWear LFWear => new TireWear(LFwearL, LFwearM, LFwearR);
 
         public TelemetryValue<float> RFwearL { get { return new TelemetryValue<float>(Sdk, "RFwearL"); } }
         public TelemetryValue<float> RFwearM { get { return new TelemetryValue<float>(Sdk, "RFwearM"); } }
         public TelemetryValue<float> RFwearR { get { return new TelemetryValue<float>(Sdk, "RFwearR"); } }
-        public TireWear RFWear => new TireWear(RFwearL, RFwearM, RFwearR);
 
         public TelemetryValue<float> LRwearL { get { return new TelemetryValue<float>(Sdk, "LRwearL"); } }
         public TelemetryValue<float> LRwearM { get { return new TelemetryValue<float>(Sdk, "LRwearM"); } }
         public TelemetryValue<float> LRwearR { get { return new TelemetryValue<float>(Sdk, "LRwearR"); } }
-        public TireWear LRWear => new TireWear(LRwearL, LRwearM, LRwearR);
 
         public TelemetryValue<float> RRwearL { get { return new TelemetryValue<float>(Sdk, "RRwearL"); } }
         public TelemetryValue<float> RRwearM { get { return new TelemetryValue<float>(Sdk, "RRwearM"); } }
         public TelemetryValue<float> RRwearR { get { return new TelemetryValue<float>(Sdk, "RRwearR"); } }
-        public TireWear RRWear => new TireWear(RRwearL, RRwearM, RRwearR);
         
         public TelemetryValue<float> LFcoldPressure { get { return new TelemetryValue<float>(Sdk, "LFcoldPressure"); } }
         public TelemetryValue<float> RFcoldPressure { get { return new TelemetryValue<float>(Sdk, "RFcoldPressure"); } }
@@ -684,19 +680,5 @@ namespace iRacingSdkWrapper
         public TelemetryValue<bool> PlayerCarInPitStall { get { return new TelemetryValue<bool>(Sdk, "PlayerCarInPitStall"); } }
         public TelemetryValue<bool> IsOnTrackCar { get { return new TelemetryValue<bool>(Sdk, "IsOnTrackCar"); } }
         public TelemetryValue<bool> OnPitRoad { get { return new TelemetryValue<bool>(Sdk, "OnPitRoad"); } }
-    }
-
-    public class TireWear
-    {
-        public TelemetryValue<float> Left { get; set; }
-        public TelemetryValue<float> Middle { get; set; }
-        public TelemetryValue<float> Right { get; set; }
-        
-        public TireWear(TelemetryValue<float> left, TelemetryValue<float> middle, TelemetryValue<float> right)
-        {
-            Left = left;
-            Middle = middle;
-            Right = right;
-        }
     }
 }

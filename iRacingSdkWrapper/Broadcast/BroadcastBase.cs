@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace iRacingSdkWrapper.Broadcast
+﻿namespace iRacingSdkWrapper.Broadcast
 {
     public abstract class BroadcastBase
     {

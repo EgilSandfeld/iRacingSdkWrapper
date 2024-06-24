@@ -13,7 +13,7 @@ namespace iRacingSdkWrapper
     /// <summary>
     /// Provides a useful wrapper of the iRacing SDK.
     /// </summary>
-    public sealed class SdkWrapper : IDisposable, ISimProvider
+    public sealed class SdkWrapper : IDisposable
     {
         #region Fields
 
@@ -59,6 +59,8 @@ namespace iRacingSdkWrapper
         
         private readonly TelemetryInfo _telemetryInfo = new (null);
         private TelemetryUpdatedEventArgs _telArgs;
+        
+        private SessionInfo _sessionInfo;
 
         #endregion
 
@@ -549,6 +551,7 @@ namespace iRacingSdkWrapper
 
         private void OnSessionInfoUpdated(SessionInfoUpdatedEventArgs e)
         {
+            _sessionInfo = e.SessionInfo;
             var handler = SessionInfoUpdated;
             handler?.Invoke(this, e);
         }
@@ -797,6 +800,16 @@ namespace iRacingSdkWrapper
                 
             }
             return sb.ToString();
+        }
+
+        public SessionInfo GetSessionInfo()
+        {
+            return _sessionInfo;
+        }
+
+        public string GetSessionInfoYaml()
+        {
+            return GetSessionInfo()?.Yaml;
         }
     }
 }
