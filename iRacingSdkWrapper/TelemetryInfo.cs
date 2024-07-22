@@ -119,7 +119,8 @@ namespace iRacingSdkWrapper
                                     this.PlayerCarTeamIncidentCount,
                                     this.PlayerCarMyIncidentCount,
                                     this.PlayerTrackSurface,
-                                    this.PlayerCarIdx
+                                    this.PlayerCarIdx,
+                                    this.PlayerCarTowTime
                                 });
             return values;
         }
@@ -678,6 +679,7 @@ namespace iRacingSdkWrapper
         public TelemetryValue<TrackSurfaces> PlayerTrackSurface { get { return new TelemetryValue<TrackSurfaces>(Sdk, "PlayerTrackSurface"); } }
 
         public TelemetryValue<int> PlayerCarIdx { get { return new TelemetryValue<int>(Sdk, "PlayerCarIdx"); } }
+        public TelemetryValue<float> PlayerCarTowTime { get { return new TelemetryValue<float>(Sdk, "PlayerCarTowTime"); } }
         
         public TelemetryValue<bool> WeatherDeclaredWet { get { return new TelemetryValue<bool>(Sdk, "WeatherDeclaredWet"); } }
         public TelemetryValue<TrackWetness> TrackWetness { get { return new TelemetryValue<TrackWetness>(Sdk, "TrackWetness"); } }
