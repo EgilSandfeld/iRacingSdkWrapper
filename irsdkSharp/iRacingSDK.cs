@@ -149,67 +149,73 @@ namespace iRSDKSharp
             if (!IsInitialized || Header == null || name == null || !VarHeaders.ContainsKey(name)) 
                 return null;
 
-            int varOffset = VarHeaders[name].Offset;
-            int count = VarHeaders[name].Count;
-            if (VarHeaders[name].Type == CVarHeader.VarType.irChar)
+            var varOffset = VarHeaders[name].Offset;
+            var count = VarHeaders[name].Count;
+            switch (VarHeaders[name].Type)
             {
-                byte[] data = new byte[count];
-                FileMapView.ReadArray<byte>(Header.Buffer + varOffset, data, 0, count);
-                return encoder.GetString(data).TrimEnd(new char[] { '\0' });
-            }
-            else if (VarHeaders[name].Type == CVarHeader.VarType.irBool)
-            {
-                if (count > 1)
+                case CVarHeader.VarType.irChar:
                 {
-                    bool[] data = new bool[count];
-                    FileMapView.ReadArray<bool>(Header.Buffer + varOffset, data, 0, count);
+                    var data = new byte[count];
+                    FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                    return encoder.GetString(data).TrimEnd(['\0']);
+                }
+                
+                case CVarHeader.VarType.irBool when count > 1 && !Is360HzTo60HzDataCollection(count):
+                {
+                    var data = new bool[count];
+                    FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
                     return data;
                 }
-                else
-                {
+                
+                case CVarHeader.VarType.irBool:
                     return FileMapView.ReadBoolean(Header.Buffer + varOffset);
-                }
-            }
-            else if (VarHeaders[name].Type == CVarHeader.VarType.irInt || VarHeaders[name].Type == CVarHeader.VarType.irBitField)
-            {
-                if (count > 1)
+                
+                case CVarHeader.VarType.irInt:
+                case CVarHeader.VarType.irBitField:
                 {
-                    int[] data = new int[count];
-                    FileMapView.ReadArray<int>(Header.Buffer + varOffset, data, 0, count);
-                    return data;
-                }
-                else
-                {
+                    if (count > 1 && !Is360HzTo60HzDataCollection(count))
+                    {
+                        var data = new int[count];
+                        FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                        return data;
+                    }
+
                     return FileMapView.ReadInt32(Header.Buffer + varOffset);
                 }
-            }
-            else if (VarHeaders[name].Type == CVarHeader.VarType.irFloat)
-            {
-                if (count > 1)
+                
+                case CVarHeader.VarType.irFloat when count > 1 && !Is360HzTo60HzDataCollection(count):
                 {
-                    float[] data = new float[count];
-                    FileMapView.ReadArray<float>(Header.Buffer + varOffset, data, 0, count);
+                    var data = new float[count];
+                    FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
                     return data;
                 }
-                else
-                {
+                
+                case CVarHeader.VarType.irFloat:
                     return FileMapView.ReadSingle(Header.Buffer + varOffset);
-                }
-            }
-            else if (VarHeaders[name].Type == CVarHeader.VarType.irDouble)
-            {
-                if (count > 1)
+                
+                case CVarHeader.VarType.irDouble when count > 1 && !Is360HzTo60HzDataCollection(count):
                 {
-                    double[] data = new double[count];
-                    FileMapView.ReadArray<double>(Header.Buffer + varOffset, data, 0, count);
+                    var data = new double[count];
+                    FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
                     return data;
                 }
-                else
-                {
+                
+                case CVarHeader.VarType.irDouble:
                     return FileMapView.ReadDouble(Header.Buffer + varOffset);
-                }
+                
+                default:
+                    return null;
             }
-            return null;
+        }
+
+        /// <summary>
+        /// When iRacing app.ini: 'irsdkLog360Hz=1 ; Log some telemetry at 360 Hz rather than at 60 Hz' the sim sends chunks of 6 data points at 360Hz (so each corresponds to 60Hz)
+        /// </summary>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        private static bool Is360HzTo60HzDataCollection(int count)
+        {
+            return count == 6;
         }
 
         [SuppressMessage("ReSharper.DPA", "DPA0003: Excessive memory allocations in LOH", MessageId = "type: System.Byte[]; size: 102MB")]

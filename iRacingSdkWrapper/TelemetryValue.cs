@@ -8,7 +8,8 @@ namespace iRacingSdkWrapper
     {
         protected TelemetryValue(iRSDKSharp.iRacingSDK sdk, string name)
         {
-            if (sdk == null) throw new ArgumentNullException("sdk");
+            if (sdk == null) 
+                throw new ArgumentNullException("sdk");
 
             _exists = sdk.VarHeaders.ContainsKey(name);
             if (_exists)
@@ -70,23 +71,23 @@ namespace iRacingSdkWrapper
         {
             try
             {
+                if (!Exists)
+                    return;
+                
                 var data = sdk.GetData(this.Name);
-
+                if (data == null)
+                    return;
+                
                 var type = typeof(T);
-                if (type.BaseType != null && type.BaseType.IsGenericType && type.BaseType.GetGenericTypeDefinition() == typeof(BitfieldBase<>))
-                {
+                if (type.BaseType is { IsGenericType: true } && type.BaseType.GetGenericTypeDefinition() == typeof(BitfieldBase<>))
                     _Value = (T)Activator.CreateInstance(type, new[] { data });
-                }
                 else
-                {
-                    if (data == null)
-                        return;
-                    
                     _Value = (T)data;
-                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                ex.Data.Add("Name", Name);
+                throw;
             }
         }
 
