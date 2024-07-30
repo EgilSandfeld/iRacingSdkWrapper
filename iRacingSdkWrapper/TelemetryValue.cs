@@ -106,5 +106,10 @@ namespace iRacingSdkWrapper
         {
             return string.Format("{0} {1}", this.Value, this.Unit);
         }
+
+        public void RefreshValue(iRacingSDK sdk)
+        {
+            GetData(sdk);
+        }
     }
 }

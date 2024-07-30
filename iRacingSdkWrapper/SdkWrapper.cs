@@ -58,7 +58,7 @@ namespace iRacingSdkWrapper
         }
         
         private readonly TelemetryInfo _telemetryInfo = new (null);
-        private TelemetryUpdatedEventArgs _telArgs;
+        //private TelemetryUpdatedEventArgs _telArgs;
         
         private SessionInfo _sessionInfo;
 
@@ -364,12 +364,13 @@ namespace iRacingSdkWrapper
 
                         // Raise the TelemetryUpdated event and pass along the lap info and session time
                         _telemetryInfo.Sdk = _sdk;
-                        if (_telArgs == null)
+                        /*if (_telArgs == null)
                             _telArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time);
                         else
-                            _telArgs.Update(_telemetryInfo, time);
+                            _telArgs.Update(_telemetryInfo, time);*/
 
-                        RaiseEvent(TelemetryUpdatedDelegate, _telArgs);
+                        var telemetryUpdatedEventArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time);
+                        RaiseEvent(TelemetryUpdatedDelegate, telemetryUpdatedEventArgs);
 
                         // Is the session info updated?
                         var newUpdate = _sdk.Header?.SessionInfoUpdate ?? lastUpdate;
@@ -691,39 +692,40 @@ namespace iRacingSdkWrapper
                         case CVarHeader.VarType.irChar:
                             ExtractVar<string>(playerIdx, header, csvContent);
                             break;
+                        
                         case CVarHeader.VarType.irBool:
                             ExtractVar<bool>(playerIdx, header, csvContent);
                             break;
+                        
                         case CVarHeader.VarType.irInt:
-                            ExtractVar<int>(playerIdx, header, csvContent);
+                            if (header.Value.Count > 1 && !iRacingSDK.Is360HzTo60HzDataCollection(header.Value.Count))
+                            {
+                                for (int i = 0; i < header.Value.Count; i++)
+                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<int>(header, i).ToString(CultureInfo.InvariantCulture));
+                            }
+                            else
+                                ExtractVar<int>(playerIdx, header, csvContent);
+                            
                             break;
                         case CVarHeader.VarType.irBitField:
                             ExtractVar<int>(playerIdx, header, csvContent);
                             break;
+                        
                         case CVarHeader.VarType.irFloat:
-                            if (header.Value.Count > 1)
+                            if (header.Value.Count > 1 && !iRacingSDK.Is360HzTo60HzDataCollection(header.Value.Count))
                             {
-                                // if (header.Value.Count >= playerIdx)
-                                //     csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + ";" + string.Join(";", GetTelemetryValue<float[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
-                                // else
-                                // {
-                                    for (int i = 0; i < header.Value.Count; i++)
-                                        csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, i).ToString(CultureInfo.InvariantCulture));
-                                // }
+                                for (int i = 0; i < header.Value.Count; i++)
+                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, i).ToString(CultureInfo.InvariantCulture));
                             }
                             else
                                 csvContent.AppendLine(ExtractHeaderKeyAndValue<float>(header).ToString(CultureInfo.InvariantCulture));
                             break;
+                        
                         case CVarHeader.VarType.irDouble:
-                            if (header.Value.Count > 1)
+                            if (header.Value.Count > 1 && !iRacingSDK.Is360HzTo60HzDataCollection(header.Value.Count))
                             {
-                                // if (header.Value.Count >= playerIdx)
-                                //     csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, playerIdx).ToString(CultureInfo.InvariantCulture) + ";" + string.Join(";", GetTelemetryValue<double[]>(header.Value.Name).Value.Select(f => f.ToString(CultureInfo.CurrentCulture))));
-                                // else
-                                // {
-                                    for (int i = 0; i < header.Value.Count; i++)
-                                        csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, i).ToString(CultureInfo.InvariantCulture));
-                                // }
+                                for (int i = 0; i < header.Value.Count; i++)
+                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, i).ToString(CultureInfo.InvariantCulture));
                             }
                             else
                                 csvContent.AppendLine(ExtractHeaderKeyAndValue<double>(header).ToString(CultureInfo.InvariantCulture));

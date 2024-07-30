@@ -213,7 +213,7 @@ namespace iRSDKSharp
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        private static bool Is360HzTo60HzDataCollection(int count)
+        public static bool Is360HzTo60HzDataCollection(int count)
         {
             return count == 6;
         }
