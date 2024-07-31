@@ -61,7 +61,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Session ID. 
         /// </summary>
-        public TelemetryValue<int> SessionUniqueID => new(Sdk, "SessionUniqueID");
+        //public TelemetryValue<int> SessionUniqueID => new(Sdk, "SessionUniqueID");
 
 
         /// <summary>
