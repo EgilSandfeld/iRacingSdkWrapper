@@ -6,7 +6,7 @@ namespace iRacingSdkWrapper
 {
     public abstract class TelemetryValue
     {
-        protected TelemetryValue(iRSDKSharp.iRacingSDK sdk, string name)
+        protected TelemetryValue(iRacingSDK sdk, string name)
         {
             if (sdk == null) 
                 throw new ArgumentNullException("sdk");
