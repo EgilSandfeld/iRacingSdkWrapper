@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -70,7 +71,7 @@ namespace iRSDKSharp
         MemoryMappedFile iRacingFile;
         MemoryMappedViewAccessor FileMapView;
 
-        public CiRSDKHeader Header = null;
+        public CiRSDKHeader Header;
         public Dictionary<string, CVarHeader> VarHeaders = new Dictionary<string, CVarHeader>();
         //List<CVarHeader> VarHeaders = new List<CVarHeader>();
 
@@ -218,17 +219,54 @@ namespace iRSDKSharp
             return count == 6;
         }
 
-        [SuppressMessage("ReSharper.DPA", "DPA0003: Excessive memory allocations in LOH", MessageId = "type: System.Byte[]; size: 102MB")]
+        //private readonly char[] _trimChars = ['\0'];
+        
+        /*[SuppressMessage("ReSharper.DPA", "DPA0003: Excessive memory allocations in LOH", MessageId = "type: System.Byte[]; size: 102MB")]
         public string GetSessionInfo()
         {
             if (IsInitialized && Header != null)
             {
-                byte[] data = new byte[Header.SessionInfoLength];
-                FileMapView.ReadArray<byte>(Header.SessionInfoOffset, data, 0, Header.SessionInfoLength);
-                return encoder.GetString(data).TrimEnd(new char[] { '\0' });
+                var data = new byte[Header.SessionInfoLength];
+                FileMapView.ReadArray(Header.SessionInfoOffset, data, 0, Header.SessionInfoLength);
+                return encoder.GetString(data).TrimEnd(_trimChars);
             }
             return null;
+        }*/
+        
+        public string GetSessionInfo()
+        {
+            if (!IsInitialized || Header == null)
+                return null;
+
+            int length = Header.SessionInfoLength;
+            byte[] rentedArray = ArrayPool<byte>.Shared.Rent(length);
+            try
+            {
+                FileMapView.ReadArray(Header.SessionInfoOffset, rentedArray, 0, length);
+                ReadOnlySpan<byte> dataSpan = new ReadOnlySpan<byte>(rentedArray, 0, length);
+
+                int trimmedLength = TrimEndIndex(dataSpan);
+                if (trimmedLength == length)  // No trimming needed
+                    return encoder.GetString(rentedArray, 0, length);
+
+                byte[] trimmedArray = new byte[trimmedLength];
+                dataSpan.Slice(0, trimmedLength).CopyTo(trimmedArray);
+                return encoder.GetString(trimmedArray);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(rentedArray);
+            }
         }
+
+        private int TrimEndIndex(ReadOnlySpan<byte> span)
+        {
+            int i = span.Length - 1;
+            while (i >= 0 && span[i] == 0)
+                i--;
+            return i + 1;
+        }
+
 
         public bool IsConnected()
         {
