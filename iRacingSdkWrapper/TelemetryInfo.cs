@@ -100,10 +100,10 @@ namespace iRacingSdkWrapper
         public TelemetryValue<bool> IsReplayPlaying => new(Sdk, "IsReplayPlaying");
 
 
-        /// <summary>
-        /// Integer replay frame number (60 per second). 
-        /// </summary>
-        public TelemetryValue<int> ReplayFrameNum => new(Sdk, "ReplayFrameNum");
+        ///// <summary>
+        ///// Integer replay frame number (60 per second). 
+        ///// </summary>
+        //public TelemetryValue<int> ReplayFrameNum => new(Sdk, "ReplayFrameNum");
 
 
         /// <summary>
@@ -136,10 +136,10 @@ namespace iRacingSdkWrapper
         public TelemetryValue<IRacingTrackSurfaceMaterials[]> CarIdxTrackSurfaceMaterial => new(Sdk, "CarIdxTrackSurfaceMaterial");
 
 
-        /// <summary>
-        /// Steering wheel angle by car index. Unit: rad
-        /// </summary>
-        public TelemetryValue<float[]> CarIdxSteer => new(Sdk, "CarIdxSteer");
+        ///// <summary>
+        ///// Steering wheel angle by car index. Unit: rad
+        ///// </summary>
+        //public TelemetryValue<float[]> CarIdxSteer => new(Sdk, "CarIdxSteer");
 
 
         /// <summary>
@@ -166,10 +166,10 @@ namespace iRacingSdkWrapper
         public TelemetryValue<IRacingSessionFlags[]> CarIdxSessionFlags => new(Sdk, "CarIdxSessionFlags");
 
 
-        /// <summary>
-        /// Race time behind leader or fastest lap time otherwise
-        /// </summary>
-        public TelemetryValue<float[]> CarIdxF2Time => new(Sdk, "CarIdxF2Time");
+        // /// <summary>
+        // /// Race time behind leader or fastest lap time otherwise
+        // /// </summary>
+        // public TelemetryValue<float[]> CarIdxF2Time => new(Sdk, "CarIdxF2Time");
 
 
         /// <summary>
@@ -202,10 +202,10 @@ namespace iRacingSdkWrapper
         public TelemetryValue<int[]> CarIdxClassPosition => new(Sdk, "CarIdxClassPosition");
 
 
-        /// <summary>
-        /// Cars best lap number
-        /// </summary>
-        public TelemetryValue<int[]> CarIdxBestLapNum => new(Sdk, "CarIdxBestLapNum");
+        // /// <summary>
+        // /// Cars best lap number
+        // /// </summary>
+        // public TelemetryValue<int[]> CarIdxBestLapNum => new(Sdk, "CarIdxBestLapNum");
 
 
         /// <summary>
@@ -249,16 +249,16 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float[]> CarIdxLastLapTime => new(Sdk, "CarIdxLastLapTime");
 
 
-        /// <summary>
-        /// Push2Pass count of usage (or remaining in Race)
-        /// </summary>
-        public TelemetryValue<int[]> CarIdxP2PCount => new(Sdk, "CarIdxP2P_Count");
+        // /// <summary>
+        // /// Push2Pass count of usage (or remaining in Race)
+        // /// </summary>
+        // public TelemetryValue<int[]> CarIdxP2PCount => new(Sdk, "CarIdxP2P_Count");
 
 
-        /// <summary>
-        /// Push2Pass active or not
-        /// </summary>
-        public TelemetryValue<bool[]> CarIdxP2PStatus => new(Sdk, "CarIdxP2P_Status");
+        // /// <summary>
+        // /// Push2Pass active or not
+        // /// </summary>
+        // public TelemetryValue<bool[]> CarIdxP2PStatus => new(Sdk, "CarIdxP2P_Status");
 
 
         /// <summary>
@@ -315,10 +315,10 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> LapDistPct => new(Sdk, "LapDistPct");
 
 
-        /// <summary>
-        /// Laps completed in race. 
-        /// </summary>
-        public TelemetryValue<int> RaceLaps => new(Sdk, "RaceLaps");
+        // /// <summary>
+        // /// Laps completed in race. 
+        // /// </summary>
+        // public TelemetryValue<int> RaceLaps => new(Sdk, "RaceLaps");
 
 
         /// <summary>
@@ -424,10 +424,10 @@ namespace iRacingSdkWrapper
         public TelemetryValue<int> CamGroupNumber => new(Sdk, "CamGroupNumber");
 
 
-        /// <summary>
-        /// State of camera system. Unit: irsdk_CameraState
-        /// </summary>
-        public TelemetryValue<CameraState> CamCameraState => new(Sdk, "CamCameraState");
+        // /// <summary>
+        // /// State of camera system. Unit: irsdk_CameraState
+        // /// </summary>
+        // public TelemetryValue<CameraState> CamCameraState => new(Sdk, "CamCameraState");
 
 
         /// <summary>
@@ -454,10 +454,10 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> SteeringWheelPctTorque => new(Sdk, "SteeringWheelPctTorque");
 
 
-        /// <summary>
-        /// Percent of shift indicator to light up. Unit: %
-        /// </summary>
-        public TelemetryValue<float> ShiftIndicatorPct => new(Sdk, "ShiftIndicatorPct");
+        // /// <summary>
+        // /// Percent of shift indicator to light up. Unit: %
+        // /// </summary>
+        // public TelemetryValue<float> ShiftIndicatorPct => new(Sdk, "ShiftIndicatorPct");
 
 
         /// <summary>
