@@ -547,6 +547,9 @@ namespace iRacingSdkWrapper
 
         public TelemetryValue<double> SessionTimeRemain => new(Sdk, "SessionTimeRemain");
 
+        /// <summary>
+        /// Integer replay frame number from end of tape
+        /// </summary>
         public TelemetryValue<int> ReplayFrameNumEnd => new(Sdk, "ReplayFrameNumEnd");
 
         public TelemetryValue<float> AirDensity => new(Sdk, "AirDensity");
@@ -678,6 +681,7 @@ namespace iRacingSdkWrapper
         public TelemetryValue<int> PlayerCarDryTireSetLimit => new(Sdk, "PlayerCarDryTireSetLimit");
 
         public TelemetryValue<int> PitSvTireCompound => new(Sdk, "PitSvTireCompound");
+        public TelemetryValue<int> PlayerTireCompound => new(Sdk, "PlayerTireCompound");
 
 
         /// <summary>
@@ -737,6 +741,9 @@ namespace iRacingSdkWrapper
 
         public TelemetryValue<int> PlayerCarClassPosition => new(Sdk, "PlayerCarClassPosition");
 
+        /// <summary>
+        /// Players best lap number
+        /// </summary>
         public TelemetryValue<int> LapBestLap => new(Sdk, "LapBestLap");
 
         public TelemetryValue<int> RadioTransmitCarIdx => new(Sdk, "RadioTransmitCarIdx");
