@@ -61,7 +61,7 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Session ID. 
         /// </summary>
-        //public TelemetryValue<int> SessionUniqueID => new(Sdk, "SessionUniqueID");
+        public TelemetryValue<int> SessionUniqueID { get { return new TelemetryValue<int>(Sdk, "SessionUniqueID"); } }
 
 
         /// <summary>
@@ -318,7 +318,7 @@ namespace iRacingSdkWrapper
         // /// <summary>
         // /// Laps completed in race. 
         // /// </summary>
-        // public TelemetryValue<int> RaceLaps => new(Sdk, "RaceLaps");
+        public TelemetryValue<int> RaceLaps => new(Sdk, "RaceLaps");
 
 
         /// <summary>
