@@ -108,6 +108,8 @@ namespace iRacingSdkWrapper
 
         /// <summary>
         /// Current lap number by car index
+        /// WARNING: The CarIdxLap value is 2 instead of 1 on the beginning of the first lap of a race (https://members.iracing.com/jforum/posts/list/2525/1470675.page#10204636)
+        /// WARNING: The CarIdxLap may increment early (https://members.iracing.com/jforum/posts/list/1200/1470675.page#8250587)
         /// </summary>
         public TelemetryValue<int[]> CarIdxLap => new(Sdk, "CarIdxLap");
 
