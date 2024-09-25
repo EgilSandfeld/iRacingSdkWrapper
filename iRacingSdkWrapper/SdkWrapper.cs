@@ -204,6 +204,7 @@ namespace iRacingSdkWrapper
             }
             
             _logger = logger;
+            _logger?.Invoke($"iRacing SDK wrapper started {_runCTSCount}");
 
             lock (_runCtLock)
             {
@@ -213,8 +214,6 @@ namespace iRacingSdkWrapper
                 _runCTSCount++;
                 /*Task.Run(() => */Loop();//);
             }
-
-            _logger?.Invoke($"iRacing SDK wrapper started {_runCTSCount}");
         }
 
         /// <summary>
