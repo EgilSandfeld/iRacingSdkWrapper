@@ -386,6 +386,7 @@ namespace iRacingSdkWrapper
 
         /// <summary>
         /// Yaw orientation. Unit: rad
+        /// Relative to whatever orientation the art team laid out the track. Useful for matching overlay data on a map
         /// </summary>
         public TelemetryValue<float> Yaw => new(Sdk, "Yaw");
 
