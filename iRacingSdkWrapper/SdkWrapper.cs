@@ -685,7 +685,7 @@ namespace iRacingSdkWrapper
             for (int i = 0; i < 64; i++)
                 zeroTo63 += ";" + i;
 
-            csvContent.AppendLine("Variable;PlayerValue" + zeroTo63);
+            csvContent.AppendLine("Variable;Value" + zeroTo63);
             csvContent.AppendLine("TimeUTC;" + DateTime.UtcNow.ToString("HH:mm:ss.fff"));
 
             foreach (var header in Sdk.VarHeaders)
