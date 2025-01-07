@@ -318,7 +318,7 @@ namespace iRacingSdkWrapper
 
 
         // /// <summary>
-        // /// Laps completed in race. 
+        // /// Laps started in race. 
         // /// </summary>
         public TelemetryValue<int> RaceLaps => new(Sdk, "RaceLaps");
 
