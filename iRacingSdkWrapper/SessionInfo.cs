@@ -114,7 +114,7 @@ namespace iRacingSdkWrapper
             }
             
             // AbbrevName missing name due to ??????????
-            _yaml = Regex.Replace(_yaml, @"AbbrevName:\s*,?\s*(?=\r?\n)", "AbbrevName: ");
+            _yaml = Regex.Replace(_yaml, @"AbbrevName:\s*,?\s*(?=\r?\n)", "AbbrevName: Doe");
             //_yaml = _yaml.Replace("AbbrevName:   ,  ", "AbbrevName: Doe, John");
             //_yaml = _yaml.Replace("AbbrevName:  ,  ", "AbbrevName: Doe, John");
             //_yaml = _yaml.Replace("AbbrevName:          ", "AbbrevName: Doe");
