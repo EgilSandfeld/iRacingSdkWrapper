@@ -393,9 +393,12 @@ namespace iRacingSdkWrapper
                             // Get the session info string
                             var sessionInfo = _sdk.GetSessionInfo();
 
-                            // Raise the SessionInfoUpdated event and pass along the session info and session time.
-                            var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
-                            RaiseEvent(OnSessionInfoUpdatedDelegate, sessionArgs);
+                            if (!string.IsNullOrEmpty(sessionInfo))
+                            {
+                                // Raise the SessionInfoUpdated event and pass along the session info and session time.
+                                var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
+                                RaiseEvent(OnSessionInfoUpdatedDelegate, sessionArgs);
+                            }
                         }
                     }
                     else if (hasConnected && _isConnected)

@@ -26,25 +26,45 @@ namespace iRacingSdkWrapper
         #region Properties
 
         private readonly double _updateTime;
+
         /// <summary>
         /// The time of this update.
         /// </summary>
-        public double UpdateTime { get { return _updateTime; } }
+        public double UpdateTime
+        {
+            get { return _updateTime; }
+        }
 
         private string _yaml;
+
         /// <summary>
         /// The raw YAML string representing the session info.
         /// </summary>
-        public string Yaml { get { return _yaml; } }
+        public string Yaml
+        {
+            get { return _yaml; }
+        }
 
         private bool _isValidYaml;
-        public bool IsValidYaml { get { return _isValidYaml; } }
+
+        public bool IsValidYaml
+        {
+            get { return _isValidYaml; }
+        }
 
         private YamlStream _yamlStream;
-        public YamlStream YamlStream { get { return _yamlStream; } }
+
+        public YamlStream YamlStream
+        {
+            get { return _yamlStream; }
+        }
 
         private YamlMappingNode _yamlRoot;
-        public YamlMappingNode YamlRoot { get { return _yamlRoot; } }
+
+        public YamlMappingNode YamlRoot
+        {
+            get { return _yamlRoot; }
+        }
 
         #endregion
 
@@ -73,25 +93,29 @@ namespace iRacingSdkWrapper
                                     foundFirst = true;
                                     continue;
                                 }
+
                                 chars[i] = '-';
                             }
                         }
+
                         line = new string(chars);
                     }
+
                     builder.AppendLine(line);
                 }
+
                 _yaml = builder.ToString();
             }
 
             // Incorrect setup info dump fix: remove the setup info
-            var indexOfSetup = _yaml.IndexOf("CarSetup:");
+            var indexOfSetup = _yaml.IndexOf("CarSetup:", StringComparison.Ordinal);
             if (indexOfSetup > 0)
             {
                 var setupString = _yaml.Substring(indexOfSetup);
                 var setupFuelLevelMatch = Regex.Match(setupString, "FuelLevel: (.*) L");
                 if (setupFuelLevelMatch.Success && float.TryParse(setupFuelLevelMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var setupFuelLevel))
                     SetupFuelLevel = setupFuelLevel;
-                
+
                 var setupTiresMatch = Regex.Match(setupString, "TireType: (.*)");
                 if (setupTiresMatch.Success)
                 {
@@ -109,10 +133,10 @@ namespace iRacingSdkWrapper
                             SetupTires = newSetupTires;
                     }
                 }
-                
+
                 _yaml = _yaml.Substring(0, indexOfSetup);
             }
-            
+
             // AbbrevName missing name due to ??????????
             _yaml = Regex.Replace(_yaml, @"AbbrevName:\s*,?\s*(?=\r?\n)", "AbbrevName: Doe");
             //_yaml = _yaml.Replace("AbbrevName:   ,  ", "AbbrevName: Doe, John");
@@ -136,19 +160,15 @@ namespace iRacingSdkWrapper
 
                 _isValidYaml = true;
             }
-            catch// (Exception ex)
+            catch // (Exception ex)
             {
                 _isValidYaml = false;
             }
-
         }
 
         public YamlQuery this[string key]
         {
-            get
-            {
-                return YamlQuery.Mapping(_yamlRoot, key);
-            }
+            get { return YamlQuery.Mapping(_yamlRoot, key); }
         }
 
         /// <summary>
@@ -180,6 +200,7 @@ namespace iRacingSdkWrapper
                 value = null;
                 return false;
             }
+
             try
             {
                 value = YamlParser.Parse(_yaml, query);
@@ -203,7 +224,5 @@ namespace iRacingSdkWrapper
         }
 
         #endregion
-        
-
     }
 }
