@@ -148,6 +148,7 @@ namespace iRacingSdkWrapper
         private readonly Object _runCtLock = new ();
         private bool _initialConnectingWithMemoryExisting;
         private int _runCTSCount;
+        private bool _retrySessionInfoRetrieval;
 
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
@@ -378,9 +379,10 @@ namespace iRacingSdkWrapper
                         // Is the session info updated?
                         var newUpdate = _sdk.Header?.SessionInfoUpdate ?? lastUpdate;
 
-                        if (newUpdate != lastUpdate)
+                        if (newUpdate != lastUpdate || _retrySessionInfoRetrieval)
                         {
                             lastUpdate = newUpdate;
+                            _retrySessionInfoRetrieval = false;
 
                             //Force check Player Car Id again, to be sure when crossing from warm up practice -> race server practice, that the ID updates.
                             //This is required since iRacing is not shut down inbetween session changes, thus never gets to set DriverId to -1
@@ -398,6 +400,10 @@ namespace iRacingSdkWrapper
                                 // Raise the SessionInfoUpdated event and pass along the session info and session time.
                                 var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
                                 RaiseEvent(OnSessionInfoUpdatedDelegate, sessionArgs);
+                            }
+                            else
+                            {
+                                _retrySessionInfoRetrieval = true;
                             }
                         }
                     }

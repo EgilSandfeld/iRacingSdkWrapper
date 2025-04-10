@@ -72,76 +72,234 @@ namespace iRacingSdkWrapper
 
         private void FixYaml(string yaml)
         {
-            // Quick hack: if there's more than 1 colon ":" in a line, keep only the first
-            using (var reader = new StringReader(yaml))
-            {
-                var builder = new StringBuilder();
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    if (line.Count(c => c == ':') > 1)
-                    {
-                        var chars = line.ToCharArray();
-                        bool foundFirst = false;
-                        for (int i = 0; i < chars.Length; i++)
-                        {
-                            var c = chars[i];
-                            if (c == ':')
-                            {
-                                if (!foundFirst)
-                                {
-                                    foundFirst = true;
-                                    continue;
-                                }
+            if (string.IsNullOrEmpty(yaml))
+                return;
 
-                                chars[i] = '-';
-                            }
-                        }
+            yaml = ApplyQuotingFixes(yaml);
+            _yaml = FixMultiColons(yaml);
 
-                        line = new string(chars);
-                    }
-
-                    builder.AppendLine(line);
-                }
-
-                _yaml = builder.ToString();
-            }
-
-            // Incorrect setup info dump fix: remove the setup info
             var indexOfSetup = _yaml.IndexOf("CarSetup:", StringComparison.Ordinal);
             if (indexOfSetup > 0)
             {
-                var setupString = _yaml.Substring(indexOfSetup);
-                var setupFuelLevelMatch = Regex.Match(setupString, "FuelLevel: (.*) L");
-                if (setupFuelLevelMatch.Success && float.TryParse(setupFuelLevelMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var setupFuelLevel))
-                    SetupFuelLevel = setupFuelLevel;
+                ExtractCarSetupData(indexOfSetup);
 
-                var setupTiresMatch = Regex.Match(setupString, "TireType: (.*)");
+                // Remove the setup info
+                _yaml = _yaml.Substring(0, indexOfSetup);
+            }
+
+            //Obsolete - Handled now by ApplyQuotingFixes
+            // AbbrevName missing name due to ??????????
+            //_yaml = Regex.Replace(_yaml, @"AbbrevName:\s*,?\s*(?=\r?\n)", "AbbrevName: Doe");
+            //_yaml = _yaml.Replace("AbbrevName:   ,  ", "AbbrevName: Doe, John");
+            //_yaml = _yaml.Replace("AbbrevName:  ,  ", "AbbrevName: Doe, John");
+            //_yaml = _yaml.Replace("AbbrevName:          ", "AbbrevName: Doe");
+        }
+
+        private static readonly Regex SetupFuelLevelRegex = new("FuelLevel: (.*) L", RegexOptions.Compiled);
+        private static readonly Regex TireTypeRegex = new("TireType: (.*)", RegexOptions.Compiled);
+        private static readonly Regex TireCompoundRegex = new("TireCompound: (.*)", RegexOptions.Compiled);
+
+        // private void ExtractCarSetupData(int indexOfSetup)
+        // {
+        //     var setupString = _yaml.Substring(indexOfSetup);
+        //     var setupFuelLevelMatch = SetupFuelLevelRegex.Match(setupString);
+        //     if (setupFuelLevelMatch.Success && float.TryParse(setupFuelLevelMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var setupFuelLevel))
+        //         SetupFuelLevel = setupFuelLevel;
+        //
+        //     var setupTiresMatch = TireTypeRegex.Match(setupString);
+        //     if (setupTiresMatch.Success)
+        //     {
+        //         var newSetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+        //         if (!string.IsNullOrEmpty(newSetupTires))
+        //             SetupTires = newSetupTires;
+        //     }
+        //     else
+        //     {
+        //         setupTiresMatch = TireCompoundRegex.Match(setupString);
+        //         if (setupTiresMatch.Success)
+        //         {
+        //             var newSetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+        //             if (!string.IsNullOrEmpty(newSetupTires))
+        //                 SetupTires = newSetupTires;
+        //         }
+        //     }
+        // }
+
+        private void ExtractCarSetupData(int indexOfSetup)
+        {
+            // Only create a small substring containing the relevant section
+            var setupSection = _yaml.Substring(indexOfSetup);
+
+            var setupFuelLevelMatch = SetupFuelLevelRegex.Match(setupSection);
+            if (setupFuelLevelMatch.Success && float.TryParse(setupFuelLevelMatch.Groups[1].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var setupFuelLevel))
+                SetupFuelLevel = setupFuelLevel;
+
+            // For tire types, search in limited section rather than entire yaml
+            var setupTiresMatch = TireTypeRegex.Match(setupSection);
+            if (setupTiresMatch.Success)
+            {
+                var newSetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
+                if (!string.IsNullOrEmpty(newSetupTires))
+                    SetupTires = newSetupTires;
+            }
+            else
+            {
+                // Look for tire compound in a limited substring
+                setupTiresMatch = TireCompoundRegex.Match(setupSection);
                 if (setupTiresMatch.Success)
                 {
                     var newSetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
                     if (!string.IsNullOrEmpty(newSetupTires))
                         SetupTires = newSetupTires;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Quick hack: if there's more than 1 colon ":" in a line, keep only the first
+        /// </summary>
+        private static string FixMultiColons(string yaml)
+        {
+            using var reader = new StringReader(yaml);
+            var builder = new StringBuilder();
+            while (reader.ReadLine() is { } line)
+            {
+                // Only process lines with multiple colons that don't have quotes
+                // (to avoid breaking already properly quoted values with colons)
+                if (line.Count(c => c == ':') > 1 && !line.Contains("'"))
+                {
+                    var chars = line.ToCharArray();
+                    var foundFirst = false;
+                    for (var i = 0; i < chars.Length; i++)
+                    {
+                        var c = chars[i];
+                        if (c != ':')
+                            continue;
+
+                        if (!foundFirst)
+                        {
+                            foundFirst = true;
+                            continue;
+                        }
+
+                        chars[i] = '-';
+                    }
+
+                    line = new string(chars);
+                }
+
+                builder.AppendLine(line);
+            }
+
+            return builder.ToString();
+        }
+
+        private readonly string[] _keysToFix = ["AbbrevName:", "TeamName:", "UserName:", "Initials:", "DriverSetupName:"];
+        private const int MaxNumDrivers = 64;
+        private const int MaxNumAdditionalBytesPerFixedKey = 2;
+
+        private string ApplyQuotingFixes(string input)
+        {
+            var keysToTrack = new YamlKeys[_keysToFix.Length];
+            for (var i = 0; i < keysToTrack.Length; i++)
+                keysToTrack[i] = new YamlKeys { Key = _keysToFix[i] };
+
+            var keyTrackersIgnoringUntilNextLine = 0;
+            var stringBuilder = new StringBuilder(input.Length + _keysToFix.Length * MaxNumAdditionalBytesPerFixedKey * MaxNumDrivers);
+
+            foreach (var ch in input)
+            {
+                if (keyTrackersIgnoringUntilNextLine == keysToTrack.Length)
+                {
+                    if (ch == '\n')
+                    {
+                        keyTrackersIgnoringUntilNextLine = 0;
+                        foreach (var keyTracker in keysToTrack)
+                        {
+                            keyTracker.Count = 0;
+                            keyTracker.IgnoreUntilNextLine = false;
+                        }
+                    }
+                }
                 else
                 {
-                    setupTiresMatch = Regex.Match(setupString, "TireCompound: (.*)");
-                    if (setupTiresMatch.Success)
+                    foreach (var keyTracker in keysToTrack)
                     {
-                        var newSetupTires = setupTiresMatch.Groups[1].Value.Replace("\r", string.Empty).Replace("\n", string.Empty);
-                        if (!string.IsNullOrEmpty(newSetupTires))
-                            SetupTires = newSetupTires;
+                        if (keyTracker.IgnoreUntilNextLine)
+                        {
+                            if (ch == '\n')
+                            {
+                                keyTracker.Count = 0;
+                                keyTracker.IgnoreUntilNextLine = false;
+                                keyTrackersIgnoringUntilNextLine--;
+                            }
+                        }
+                        else if (keyTracker.AddFirstQuote)
+                        {
+                            if (ch == '\n')
+                            {
+                                keyTracker.Count = 0;
+                                keyTracker.AddFirstQuote = false;
+                            }
+                            else if (ch != ' ')
+                            {
+                                stringBuilder.Append('\'');
+                                keyTracker.AddFirstQuote = false;
+                                keyTracker.AddSecondQuote = true;
+                            }
+                        }
+                        else if (keyTracker.AddSecondQuote)
+                        {
+                            if (ch == '\n')
+                            {
+                                stringBuilder.Append('\'');
+                                keyTracker.Count = 0;
+                                keyTracker.AddSecondQuote = false;
+                            }
+                            else if (ch == '\'')
+                            {
+                                stringBuilder.Append('\''); // Escape single quotes within the value
+                            }
+                        }
+                        else
+                        {
+                            if (ch == keyTracker.Key[keyTracker.Count])
+                            {
+                                keyTracker.Count++;
+                                if (keyTracker.Count == keyTracker.Key.Length)
+                                {
+                                    keyTracker.AddFirstQuote = true;
+                                }
+                            }
+                            else if (ch != ' ')
+                            {
+                                keyTracker.IgnoreUntilNextLine = true;
+                                keyTrackersIgnoringUntilNextLine++;
+                            }
+                        }
                     }
                 }
 
-                _yaml = _yaml.Substring(0, indexOfSetup);
+                stringBuilder.Append(ch);
             }
 
-            // AbbrevName missing name due to ??????????
-            _yaml = Regex.Replace(_yaml, @"AbbrevName:\s*,?\s*(?=\r?\n)", "AbbrevName: Doe");
-            //_yaml = _yaml.Replace("AbbrevName:   ,  ", "AbbrevName: Doe, John");
-            //_yaml = _yaml.Replace("AbbrevName:  ,  ", "AbbrevName: Doe, John");
-            //_yaml = _yaml.Replace("AbbrevName:          ", "AbbrevName: Doe");
+            // Handle any pending quotes at the end of the string
+            foreach (var keyTracker in keysToTrack)
+            {
+                if (keyTracker.AddSecondQuote)
+                    stringBuilder.Append('\'');
+            }
+
+            return stringBuilder.ToString();
+        }
+
+        private class YamlKeys
+        {
+            public string Key = string.Empty;
+            public int Count;
+            public bool IgnoreUntilNextLine;
+            public bool AddFirstQuote;
+            public bool AddSecondQuote;
         }
 
         public float SetupFuelLevel { get; set; }
@@ -149,19 +307,44 @@ namespace iRacingSdkWrapper
 
         private void ParseYaml()
         {
+            // Clear existing resources before parsing to help with memory pressure
+            _yamlRoot = null;
+            _isValidYaml = false;
+
+            if (string.IsNullOrEmpty(Yaml))
+                return;
+
             try
             {
-                using (var reader = new StringReader(Yaml))
-                {
-                    _yamlStream = new YamlStream();
-                    _yamlStream.Load(reader);
-                    _yamlRoot = (YamlMappingNode)_yamlStream.Documents[0].RootNode;
-                }
+                // Use StreamReader with minimal buffer to reduce memory allocation
+                using var reader = new StringReader(Yaml);
 
-                _isValidYaml = true;
+                // Reuse existing YamlStream if possible
+                if (_yamlStream == null)
+                    _yamlStream = new YamlStream();
+                else
+                    _yamlStream.Documents.Clear();
+
+                // Consider adding deserialization options here if the YAML library supports it
+                // For example: var deserializerBuilder = new DeserializerBuilder().WithMaximumRecursion(20);
+
+                _yamlStream.Load(reader);
+
+                // Avoid cast if possible by checking type first
+                if (_yamlStream.Documents.Count > 0)
+                {
+                    var rootNode = _yamlStream.Documents[0].RootNode as YamlMappingNode;
+                    if (rootNode != null)
+                    {
+                        _yamlRoot = rootNode;
+                        _isValidYaml = true;
+                    }
+                }
             }
-            catch // (Exception ex)
+            catch (Exception)
             {
+                // Consider implementing IDisposable pattern if storing large YAML data
+                _yamlRoot = null;
                 _isValidYaml = false;
             }
         }
