@@ -577,10 +577,19 @@ namespace iRacingSdkWrapper
 
         public TelemetryValue<float> WindVel => new(Sdk, "WindVel");
 
+        /// <summary>
+        /// The car's total incident count
+        /// </summary>
         public TelemetryValue<int> PlayerCarTeamIncidentCount => new(Sdk, "PlayerCarTeamIncidentCount");
 
+        /// <summary>
+        /// Player's contribution to the car's total incident count
+        /// </summary>
         public TelemetryValue<int> PlayerCarMyIncidentCount => new(Sdk, "PlayerCarMyIncidentCount");
 
+        /// <summary>
+        /// The current driver's contribution to the car's total incident count
+        /// </summary>
         public TelemetryValue<int> PlayerCarDriverIncidentCount => new(Sdk, "PlayerCarDriverIncidentCount");
 
         public TelemetryValue<IRacingTrackSurfaces> PlayerTrackSurface => new(Sdk, "PlayerTrackSurface");
