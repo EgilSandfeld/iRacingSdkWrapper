@@ -8,7 +8,7 @@ namespace iRacingSdkWrapper
         NotInWorld = -1,
         OffTrack,
         InPitStall,
-        AproachingPits,
+        ApproachingPits,
         OnTrack
     }
     
