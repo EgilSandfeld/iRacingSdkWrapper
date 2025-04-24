@@ -680,10 +680,19 @@ namespace iRacingSdkWrapper
 
         public TelemetryValue<float> SessionTimeOfDay => new(Sdk, "SessionTimeOfDay");
 
+        /// <summary>
+        /// Delta time for session last lap
+        /// </summary>
         public TelemetryValue<float> LapDeltaToSessionLastlLap => new(Sdk, "LapDeltaToSessionLastlLap");
 
+        /// <summary>
+        /// Delta time for session best lap
+        /// </summary>
         public TelemetryValue<float> LapDeltaToSessionBestLap => new(Sdk, "LapDeltaToSessionBestLap");
 
+        /// <summary>
+        /// Delta time for session best lap is valid
+        /// </summary>
         public TelemetryValue<bool> LapDeltaToSessionBestLapOK => new(Sdk, "LapDeltaToSessionBestLap_OK");
 
         public TelemetryValue<float> LapBestLapTime => new(Sdk, "LapBestLapTime");
