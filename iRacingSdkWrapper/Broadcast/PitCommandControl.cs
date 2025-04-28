@@ -14,10 +14,10 @@ namespace iRacingSdkWrapper.Broadcast
         /// <summary>
         /// Schedule to add the specified amount of fuel (in liters) in the next pitstop.
         /// </summary>
-        /// <param name="amount">The amount of fuel (in liters) to add. Use 0 to leave at current value.</param>
-        public void AddFuel(int amount)
+        /// <param name="amountLiters">The amount of fuel (in liters) to add. Use 0 to leave at current value.</param>
+        public void AddFuel(int amountLiters)
         {
-            Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.Fuel, amount);
+            Broadcast(BroadcastMessageTypes.PitCommand, (int)PitCommandModeTypes.Fuel, amountLiters);
         }
 
         private void ChangeTire(PitCommandModeTypes type, int pressure)
