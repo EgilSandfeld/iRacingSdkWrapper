@@ -19,13 +19,21 @@ namespace iRacingSdkWrapper
 
         private readonly iRacingSDK _sdk;
         private readonly SynchronizationContext _context;
-        private int _waitTime;
+
         private Mutex _readMutex;
         private CancellationTokenSource _runCTS;
         private Action<string> _logger;
 
         private const string PlayerCarIdx = "PlayerCarIdx";
+        
         private const string Sessiontime = "SessionTime";
+        
+        /// <summary>
+        /// SessionTick is our internal clock that we use to keep pace in the physics. This is the master clock that all copies of the sim run off of.
+        /// In fact it should be synchronized across all clients in the session, so you can even use it to compare data from multiple users.
+        /// David Tucker: https://members.iracing.com/jforum/posts/list/2650/1470675.page#10587784
+        /// </summary>
+        private const string SessionTick = "SessionTick";
         
         private Action<EventArgs> _onConnectedDelegate;
         public Action<EventArgs> OnConnectedDelegate
@@ -111,8 +119,9 @@ namespace iRacingSdkWrapper
         /// Is the SDK connected to iRacing?
         /// </summary>
         public bool IsConnected => _isConnected && _driverId > -1;
-
-        private double _telemetryUpdateFrequency;
+        
+        private static double _telemetryUpdateFrequency = 60;
+        
         /// <summary>
         /// Gets or sets the number of times the telemetry info is updated per second. The default and maximum is 60 times per second.
         /// </summary>
@@ -126,11 +135,27 @@ namespace iRacingSdkWrapper
                 if (value > 60)
                     throw new ArgumentOutOfRangeException("TelemetryUpdateFrequency cannot be more than 60.");
 
+                if (Math.Abs(_telemetryUpdateFrequency - value) < 0.0001)
+                    return;
+                
                 _telemetryUpdateFrequency = value;
 
-                _waitTime = (int)Math.Floor(1000f / value) - 1;
+                WaitTime = UpdateWaitTime();
             }
         }
+
+        private static TimeSpan UpdateWaitTime()
+        {
+            var waitMs = 1000f / _telemetryUpdateFrequency;
+            
+            //Subtract 0.1 ms to ensure we poll slightly faster to counter any thread delays
+            //This is subtracted to avoid missing serves over time, as polling always take slightly longer than just the "Thread.Sleep" part
+            waitMs -= 0.1;
+            
+            return TimeSpan.FromMilliseconds(waitMs);
+        }
+
+        private TimeSpan WaitTime { get; set; } = UpdateWaitTime();
 
         /// <summary>
         /// The time in milliseconds between each check if iRacing is running. Use a low value (hundreds of milliseconds) to respond quickly to iRacing startup.
@@ -149,6 +174,8 @@ namespace iRacingSdkWrapper
         private bool _initialConnectingWithMemoryExisting;
         private int _runCTSCount;
         private bool _retrySessionInfoRetrieval;
+        private double _latestTime;
+        private int _latestTick;
 
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
@@ -282,7 +309,8 @@ namespace iRacingSdkWrapper
             {
                 var sessionInfo = _sdk.GetSessionInfo();
                 var time = (double)_sdk.GetData("SessionTime");
-                var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
+                var tick = (int)_sdk.GetData("SessionTick");
+                var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time, tick);
                 RaiseEvent(OnSessionInfoUpdated, sessionArgs);
             }
             catch (NullReferenceException)
@@ -362,20 +390,27 @@ namespace iRacingSdkWrapper
                             _driverId = newPlayerCarIdx;
                             //_logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId}");
                         }
+                        
+                        var tickObject = _sdk.GetData(SessionTick);
+                        var tick = -1;
+                        if (tickObject != null)
+                            tick = (int)tickObject;
+                        
+                        // Raise the TelemetryUpdated event and pass along the lap info and session time
+                        if (_telemetryInfo != null)
+                            _telemetryInfo.Sdk = _sdk;
 
                         // Get the session time (in seconds) of this update
                         var timeObject = _sdk.GetData(Sessiontime);
                         var time = -1d;
                         if (timeObject != null)
                             time = (double)timeObject;
-
-                        // Raise the TelemetryUpdated event and pass along the lap info and session time
-                        if (_telemetryInfo != null)
-                            _telemetryInfo.Sdk = _sdk;
-
-                        var telemetryUpdatedEventArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time);
+                        
+                        var telemetryUpdatedEventArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time, tick);
                         RaiseEvent(TelemetryUpdatedDelegate, telemetryUpdatedEventArgs);
-
+                        _latestTick = tick;
+                        _latestTime = time;
+                        
                         // Is the session info updated?
                         var newUpdate = _sdk.Header?.SessionInfoUpdate ?? lastUpdate;
 
@@ -398,7 +433,7 @@ namespace iRacingSdkWrapper
                             if (!string.IsNullOrEmpty(sessionInfo))
                             {
                                 // Raise the SessionInfoUpdated event and pass along the session info and session time.
-                                var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time);
+                                var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, _latestTime, _latestTick);
                                 RaiseEvent(OnSessionInfoUpdatedDelegate, sessionArgs);
                             }
                             else
@@ -446,10 +481,7 @@ namespace iRacingSdkWrapper
                     // Sleep for a short amount of time until the next update is available
                     if (_isConnected || _sdk != null && _sdk.Header?.Status == 1)
                     {
-                        if (_waitTime is <= 0 or > 1000)
-                            _waitTime = 15;
-
-                        Thread.Sleep(_waitTime);
+                        Thread.Sleep(WaitTime);
                     }
                     else
                     {
@@ -631,9 +663,20 @@ namespace iRacingSdkWrapper
 
         public class SdkUpdateEventArgs : EventArgs
         {
-            public SdkUpdateEventArgs(double time)
+            public SdkUpdateEventArgs(double time, int tick)
             {
                 _updateTime = time;
+                _updateTick = tick;
+            }
+
+            private int _updateTick;
+            /// <summary>
+            /// Gets the Tick when this update occured.
+            /// </summary>
+            public int UpdateTick
+            {
+                get { return _updateTick; }
+                set => _updateTick = value;
             }
 
             private double _updateTime;
@@ -649,7 +692,7 @@ namespace iRacingSdkWrapper
 
         public class SessionInfoUpdatedEventArgs : SdkUpdateEventArgs
         {
-            public SessionInfoUpdatedEventArgs(string sessionInfo, double time) : base(time)
+            public SessionInfoUpdatedEventArgs(string sessionInfo, double time, int tick) : base(time, tick)
             {
                 _SessionInfo = new SessionInfo(sessionInfo, time);
             }
@@ -663,7 +706,7 @@ namespace iRacingSdkWrapper
 
         public class TelemetryUpdatedEventArgs : SdkUpdateEventArgs
         {
-            public TelemetryUpdatedEventArgs(TelemetryInfo info, double time) : base(time)
+            public TelemetryUpdatedEventArgs(TelemetryInfo info, double time, int tick) : base(time, tick)
             {
                 _telemetryInfo = info;
             }
