@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using iRacingSdkWrapper.Broadcast;
@@ -237,10 +238,9 @@ namespace iRacingSdkWrapper
             lock (_runCtLock)
             {
                 _readMutex = new Mutex(false);
-                // Create new cancellation token and run the looper
                 _runCTS = new CancellationTokenSource();
                 _runCTSCount++;
-                /*Task.Run(() => */Loop();//);
+                Loop();
             }
         }
 
@@ -255,22 +255,19 @@ namespace iRacingSdkWrapper
                 return;
             }
 
-            //lock (_runCtLock)
-            //{
-                _logger?.Invoke($"iRacing SDK wrapper stopping {_runCTSCount}");
-                if (_runCTS != null)
-                {
-                    _runCTS.Cancel(true);
-                    WaitHandle.WaitAny(new[] { _runCTS.Token.WaitHandle });
-                    _logger?.Invoke($"iRacing SDK wrapper token stopped runCT {_runCTSCount}");
-                    _runCTS.Dispose();
-                    _runCTS = null;
-                }
-                else
-                    _logger?.Invoke("iRacing SDK wrapper stopping No RunCT");
-                
-                _sdk?.Shutdown();
-            //}
+            _logger?.Invoke($"iRacing SDK wrapper stopping {_runCTSCount}");
+            if (_runCTS != null)
+            {
+                _runCTS.Cancel(true);
+                WaitHandle.WaitAny([_runCTS.Token.WaitHandle]);
+                _logger?.Invoke($"iRacing SDK wrapper token stopped runCT {_runCTSCount}");
+                _runCTS.Dispose();
+                _runCTS = null;
+            }
+            else
+                _logger?.Invoke("iRacing SDK wrapper stopping No RunCT");
+            
+            _sdk?.Shutdown();
             
             _logger?.Invoke($"iRacing SDK wrapper stopped runCT {_runCTSCount}");
 
@@ -731,10 +728,10 @@ namespace iRacingSdkWrapper
             if (Sdk == null)
                 return "";
 
-            StringBuilder csvContent = new StringBuilder();
+            var csvContent = new StringBuilder();
 
-            string zeroTo63 = "";
-            for (int i = 0; i < 64; i++)
+            var zeroTo63 = "";
+            for (var i = 0; i < 64; i++)
                 zeroTo63 += ";" + i;
 
             csvContent.AppendLine("Variable;Value" + zeroTo63);
@@ -755,7 +752,7 @@ namespace iRacingSdkWrapper
                             break;
                         
                         case CVarHeader.VarType.irInt:
-                            if (header.Value.Count > 1 && !iRacingSDK.Is360HzTo60HzDataCollection(header.Value.Count))
+                            if (header.Value.Count > 1 && header.Value.Count != 64 && !iRacingSDK.Is360HzTo60HzDataCollection(header.Value.Count))
                             {
                                 for (int i = 0; i < header.Value.Count; i++)
                                     csvContent.AppendLine(ExtractHeaderKeyValuePair<int>(header, i).ToString(CultureInfo.InvariantCulture));
@@ -771,8 +768,13 @@ namespace iRacingSdkWrapper
                         case CVarHeader.VarType.irFloat:
                             if (header.Value.Count > 1 && !iRacingSDK.Is360HzTo60HzDataCollection(header.Value.Count))
                             {
-                                for (int i = 0; i < header.Value.Count; i++)
-                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, i).ToString(CultureInfo.InvariantCulture));
+                                if (header.Value.Count == 64)
+                                    ExtractVar<float>(playerIdx, header, csvContent);
+                                else
+                                {
+                                    for (int i = 0; i < header.Value.Count; i++)
+                                        csvContent.AppendLine(ExtractHeaderKeyValuePair<float>(header, i).ToString(CultureInfo.InvariantCulture));
+                                }
                             }
                             else
                                 csvContent.AppendLine(ExtractHeaderKeyAndValue<float>(header).ToString(CultureInfo.InvariantCulture));
@@ -781,8 +783,13 @@ namespace iRacingSdkWrapper
                         case CVarHeader.VarType.irDouble:
                             if (header.Value.Count > 1 && !iRacingSDK.Is360HzTo60HzDataCollection(header.Value.Count))
                             {
-                                for (int i = 0; i < header.Value.Count; i++)
-                                    csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, i).ToString(CultureInfo.InvariantCulture));
+                                if (header.Value.Count == 64)
+                                    ExtractVar<double>(playerIdx, header, csvContent);
+                                else
+                                {
+                                    for (int i = 0; i < header.Value.Count; i++)
+                                        csvContent.AppendLine(ExtractHeaderKeyValuePair<double>(header, i).ToString(CultureInfo.InvariantCulture));
+                                }
                             }
                             else
                                 csvContent.AppendLine(ExtractHeaderKeyAndValue<double>(header).ToString(CultureInfo.InvariantCulture));
@@ -803,7 +810,7 @@ namespace iRacingSdkWrapper
             if (header.Value.Count > 1)
             {
                 if (header.Value.Count >= playerIdx)
-                    csvContent.AppendLine(ExtractHeaderKeyValuePair<T>(header, playerIdx) + ";" + string.Join(";", GetTelemetryValue<T[]>(header.Value.Name).Value));
+                    csvContent.AppendLine(ExtractHeaderKeyValuePair<T>(header, playerIdx) + ";" + string.Join(";", Format<T>(GetTelemetryValue<T[]>(header.Value.Name).Value)));
                 else
                 {
                     for (int i = 0; i < header.Value.Count; i++)
@@ -814,15 +821,37 @@ namespace iRacingSdkWrapper
                 csvContent.AppendLine(ExtractHeaderKeyAndValue<T>(header));
         }
 
+        private string[] Format<T>(T[] value)
+        {
+            if (typeof(T) == typeof(float))
+                return value.Select(x => ((float)(object)x).ToString(CultureInfo.InvariantCulture)).ToArray();
+    
+            if (typeof(T) == typeof(double))
+                return value.Select(x => ((double)(object)x).ToString(CultureInfo.InvariantCulture)).ToArray();
+    
+            return value.Select(x => x.ToString()).ToArray();
+        }
+
+        private string Format<T>(T value)
+        {
+            if (typeof(T) == typeof(float))
+                return ((float)(object)value).ToString(CultureInfo.InvariantCulture);
+    
+            if (typeof(T) == typeof(double))
+                return ((double)(object)value).ToString(CultureInfo.InvariantCulture);
+    
+            return value.ToString();
+        }
+
         private string ExtractHeaderKeyAndValue<T>(KeyValuePair<string, CVarHeader> header)
         {
-            return header.Key + ";" + GetTelemetryValue<T>(header.Value.Name).Value;
+            return header.Key + ";" + Format(GetTelemetryValue<T>(header.Value.Name).Value);
         }
 
         private string ExtractHeaderKeyValuePair<T>(KeyValuePair<string, CVarHeader> header, int i)
         {
             var variable = GetTelemetryValue<T[]>(header.Value.Name);
-            return header.Key + "_" + i + ";" + (variable.Value != null ? variable.Value[i] : "null");
+            return header.Key + "_" + i + ";" + (variable.Value != null ? Format(variable.Value[i]) : "null");
         }
 
         public string ToPrettyString(string origin = "iRDSDK")
