@@ -794,5 +794,7 @@ namespace iRacingSdkWrapper
         public TelemetryValue<bool> OnPitRoad => new(Sdk, "OnPitRoad");
 
         public TelemetryValue<float> PlayerCarTowTime => new(Sdk, "PlayerCarTowTime");
+        public TelemetryValue<float> CpuUsageFG => new(Sdk, "CpuUsageFG");
+        public TelemetryValue<float> GpuUsage => new(Sdk, "GpuUsage");
     }
 }
