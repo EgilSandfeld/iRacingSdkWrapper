@@ -565,6 +565,11 @@ namespace iRacingSdkWrapper
 
         public TelemetryValue<int> Skies => new(Sdk, "Skies");
 
+        /// <summary>
+        /// - Older "TrackTemp" telemetry reading has been deprecated in favor of "TrackTempCrew".
+        /// - - For now, "TrackTemp" is set to, "TrackTempCrew" for backwards compatibility.
+        /// https://members.iracing.com/jforum/posts/list/3050/1470675.page#11337287
+        /// </summary>
         public TelemetryValue<float> TrackTemp => new(Sdk, "TrackTemp");
 
         public TelemetryValue<float> TrackTempCrew => new(Sdk, "TrackTempCrew");
