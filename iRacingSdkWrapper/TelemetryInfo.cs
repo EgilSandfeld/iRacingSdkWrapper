@@ -680,6 +680,11 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> DCBrakeBias => new(Sdk, "dcBrakeBias");
 
         public TelemetryValue<float> DCTractionControl => new(Sdk, "dcTractionControl");
+        public TelemetryValue<float> DCTractionControl2 => new(Sdk, "dcTractionControl2");
+        public TelemetryValue<bool> DCTractionControlToggle => new(Sdk, "dcTractionControlToggle");
+        public TelemetryValue<bool> DCTCT => new(Sdk, "dcTCT");
+        public TelemetryValue<float> DCTractionControlSetting => new(Sdk, "dcTractionControlSetting");
+        public TelemetryValue<float> DCTractionControlSwitch => new(Sdk, "dcTractionControlSwitch");
 
         public TelemetryValue<float> DCABS => new(Sdk, "dcABS");
 
