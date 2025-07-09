@@ -70,7 +70,8 @@ namespace iRacingSdkWrapper
         //private TelemetryUpdatedEventArgs _telArgs;
         
         private SessionInfo _sessionInfo;
-
+        private bool _hasConnected;
+        
         #endregion
 
         /// <summary>
@@ -231,7 +232,7 @@ namespace iRacingSdkWrapper
                 _logger?.Invoke($"iRacing SDK wrapper already running {_runCTSCount}");
                 return;
             }
-            
+         
             _logger = logger;
             _logger?.Invoke($"iRacing SDK wrapper started {_runCTSCount}");
 
@@ -338,7 +339,6 @@ namespace iRacingSdkWrapper
         {
             _logger?.Invoke($"iRacing SDK Loop with runCT{_runCTSCount}");
             int lastUpdate = -1;
-            bool hasConnected = false;
             int tries = 0;
 
             if (_runCTS == null || _runCTS.IsCancellationRequested)
@@ -359,7 +359,7 @@ namespace iRacingSdkWrapper
                             _isConnected = true;
 
                             // If this is the first time for the app but iRacing memory mapping file exists in memory, or a server change, restart the iRacing SDK, so we get the new server's memory mapping
-                            if (hasConnected || _initialConnectingWithMemoryExisting)
+                            if (_hasConnected || _initialConnectingWithMemoryExisting)
                             {
                                 _logger?.Invoke($"iRacing SDK Wrapper restarting runCT{_runCTSCount}");
                                 _sdk.Shutdown();
@@ -371,7 +371,7 @@ namespace iRacingSdkWrapper
                             RaiseEvent(OnConnectedDelegate, EventArgs.Empty);
                         }
 
-                        hasConnected = true;
+                        _hasConnected = true;
 
                         _readMutex.WaitOne(8);
                         hasMutex = true;
@@ -439,7 +439,7 @@ namespace iRacingSdkWrapper
                             }
                         }
                     }
-                    else if (hasConnected && _isConnected)
+                    else if (_hasConnected && _isConnected)
                     {
                         _logger?.Invoke($"iRacing SDK Wrapper disconnecting from server runCT{_runCTSCount}");
                         // We have already been initialized before, so the sim is closing
@@ -454,23 +454,23 @@ namespace iRacingSdkWrapper
                         if (!_loggedFirst)
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup runCT{_runCTSCount}");
 
-                        if (!hasConnected && _sdk != null)
+                        if (!_hasConnected && _sdk != null)
                             _memoryFileExists = _sdk.Startup(_runCTS.Token);
 
                         if (_memoryFileExists
                             && (_sdk == null || _sdk.Header == null || _sdk.Header.VarCount == 0)
-                            && (!_loggedFirstConnecting || hasConnected))
+                            && (!_loggedFirstConnecting || _hasConnected))
                         {
                             RaiseEvent(OnConnectingDelegate, EventArgs.Empty);
                             _memoryFileExists = false;
                             _loggedFirstConnecting = true;
 
-                            if (!hasConnected)
+                            if (!_hasConnected)
                                 _initialConnectingWithMemoryExisting = true;
                         }
 
                         if (!_loggedFirst)
-                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup hasConnected: {hasConnected} memoryFileExists: {_memoryFileExists}");
+                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup hasConnected: {_hasConnected} memoryFileExists: {_memoryFileExists}");
 
                         _loggedFirst = true;
                     }
