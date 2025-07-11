@@ -234,13 +234,13 @@ namespace iRacingSdkWrapper
             }
          
             _logger = logger;
-            _logger?.Invoke($"iRacing SDK wrapper started {_runCTSCount}");
 
             lock (_runCtLock)
             {
                 _readMutex = new Mutex(false);
                 _runCTS = new CancellationTokenSource();
                 _runCTSCount++;
+                _logger?.Invoke($"iRacing SDK wrapper started {_runCTSCount}");
                 Loop();
             }
         }
@@ -454,7 +454,7 @@ namespace iRacingSdkWrapper
                         if (!_loggedFirst)
                             _logger?.Invoke($"iRacing SDK Wrapper SDK startup runCT{_runCTSCount}");
 
-                        if (!_hasConnected && _sdk != null)
+                        if (/*!_hasConnected && */_sdk != null)
                             _memoryFileExists = _sdk.Startup(_runCTS.Token);
 
                         if (_memoryFileExists
@@ -485,16 +485,17 @@ namespace iRacingSdkWrapper
                         //_logger?.Invoke("iRacing SDK Wrapper sleeping");
                         // Not connected yet, no need to check every 16 ms, let's try again in some time
                         var waited = 0;
+                        const int msWait = 100;
                         while (waited < ConnectSleepTime)
                         {
-                            Thread.Sleep(100);
+                            Thread.Sleep(msWait);
                             if (_runCTS == null || _runCTS.IsCancellationRequested)
                             {
                                 _logger?.Invoke($"iRacing SDK Wrapper sleep breaked runCT{_runCTSCount}");
                                 break;
                             }
 
-                            waited += 10;
+                            waited += msWait;
                         }
                     }
                 }
