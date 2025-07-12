@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace iRacingSdkWrapper
@@ -87,6 +88,7 @@ namespace iRacingSdkWrapper
     
     [JsonConverter(typeof(StringEnumConverter))] 
     public enum IRacingTrackWetness
+    
     {
         Unknown = 0, //irsdk_TrackWetness_UNKNOWN = 0,
         Dry, //irsdk_TrackWetness_Dry,
@@ -97,4 +99,24 @@ namespace iRacingSdkWrapper
         VeryWet, //irsdk_TrackWetness_VeryWet,
         Flooded, //irsdk_TrackWetness_ExtremelyWet
     }
+    
+    // [JsonConverter(typeof(StringEnumConverter))] 
+    // public enum PaceMode
+    // {
+    //     SingleFileStart = 0,
+    //     DoubleFileStart,
+    //     SingleFileRestart,
+    //     DoubleFileRestart,
+    //     NotPacing,
+    // }
+    //
+    // [JsonConverter(typeof(StringEnumConverter))] 
+    // [Flags]
+    // public enum PaceFlags
+    // {
+    //     None = 0x00,
+    //     EndOfLine = 0x01,
+    //     FreePass = 0x02,
+    //     WavedAround = 0x04,
+    // }
 }

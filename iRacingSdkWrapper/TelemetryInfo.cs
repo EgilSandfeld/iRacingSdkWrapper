@@ -806,5 +806,44 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> PlayerCarTowTime => new(Sdk, "PlayerCarTowTime");
         public TelemetryValue<float> CpuUsageFG => new(Sdk, "CpuUsageFG");
         public TelemetryValue<float> GpuUsage => new(Sdk, "GpuUsage");
+        
+        /// <summary>
+        /// Are we pacing or not
+        /// irsdk_PaceMode:
+        /// irsdk_PaceModeSingleFileStart = 0,
+        /// irsdk_PaceModeDoubleFileStart,
+        /// irsdk_PaceModeSingleFileRestart,
+        /// irsdk_PaceModeDoubleFileRestart,
+        /// irsdk_PaceModeNotPacing,
+        /// </summary>
+        public TelemetryValue<int> PaceMode => new(Sdk, "PaceMode");
+        
+        /// <summary>
+        /// The assigned line for each car
+        /// What line cars are pacing in, or -1 if not pacing
+        /// The line indicates where the driver should be next, but not overall
+        /// "It is too much to ask a mixed up field to just sort itself out in one step."
+        /// https://forums.iracing.com/discussion/comment/519213/#Comment_519213
+        /// </summary>
+        public TelemetryValue<int[]> CarIdxPaceLine => new(Sdk, "CarIdxPaceLine");
+        
+        /// <summary>
+        /// The assigned row for each car
+        /// What row cars are pacing in, or -1 if not pacing
+        /// The row indicates where the driver should be next, but not overall
+        /// "It is too much to ask a mixed up field to just sort itself out in one step."
+        /// https://forums.iracing.com/discussion/comment/519213/#Comment_519213
+        /// </summary>
+        public TelemetryValue<int[]> CarIdxPaceRow => new(Sdk, "CarIdxPaceRow");
+        
+        /// <summary>
+        /// Pacing status flags for each car
+        /// irsdk_PaceFlags:
+        /// None (?) = 0x00,
+        /// irsdk_PaceFlagsEndOfLine = 0x01,
+        /// irsdk_PaceFlagsFreePass = 0x02,
+        /// irsdk_PaceFlagsWavedAround = 0x04,
+        /// </summary>
+        public TelemetryValue<int[]> CarIdxPaceFlags => new(Sdk, "CarIdxPaceFlags");
     }
 }
