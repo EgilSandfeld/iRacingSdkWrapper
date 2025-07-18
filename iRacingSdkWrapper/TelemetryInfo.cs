@@ -845,5 +845,16 @@ namespace iRacingSdkWrapper
         /// irsdk_PaceFlagsWavedAround = 0x04,
         /// </summary>
         public TelemetryValue<int[]> CarIdxPaceFlags => new(Sdk, "CarIdxPaceFlags");
+        
+        /// <summary>
+        /// Sun angle above horizon in radians
+        /// </summary>
+        public TelemetryValue<float> SolarAltitude => new(Sdk, "SolarAltitude");
+        
+        /// <summary>
+        /// Sun angle clockwise from north in radians
+        /// </summary>
+        public TelemetryValue<float> SolarAzimuth => new(Sdk, "SolarAzimuth");
+        
     }
 }
