@@ -47,6 +47,18 @@ namespace iRacingSdkWrapper
 
 
         /// <summary>
+        /// Session duration in seconds. Unit: s
+        /// </summary>
+        public TelemetryValue<double> SessionTimeTotal => new(Sdk, "SessionTimeTotal");
+
+
+        /// <summary>
+        /// Session duration in laps. Unit: s
+        /// </summary>
+        public TelemetryValue<int> SessionLapsTotal => new(Sdk, "SessionLapsTotal");
+
+
+        /// <summary>
         /// Session number. 
         /// </summary>
         public TelemetryValue<int> SessionNum => new(Sdk, "SessionNum");
@@ -317,10 +329,22 @@ namespace iRacingSdkWrapper
         public TelemetryValue<float> LapDistPct => new(Sdk, "LapDistPct");
 
 
-        // /// <summary>
-        // /// Laps started in race. 
-        // /// </summary>
+        /// <summary>
+        /// Laps started in race. 
+        /// </summary>
         public TelemetryValue<int> RaceLaps => new(Sdk, "RaceLaps");
+
+
+        /// <summary>
+        /// Distance to the car ahead 
+        /// </summary>
+        public TelemetryValue<double> CarDistAhead => new(Sdk, "CarDistAhead");
+
+
+        /// <summary>
+        /// Distance to the car behind 
+        /// </summary>
+        public TelemetryValue<double> CarDistBehind => new(Sdk, "CarDistBehind");
 
 
         /// <summary>
@@ -629,6 +653,34 @@ namespace iRacingSdkWrapper
 
         public TelemetryValue<float> RRwearR => new(Sdk, "RRwearR");
 
+        /// <summary>
+        /// LF Odometer (distance of the tire, in meters)
+        /// Updates every 100m
+        /// https://forums.iracing.com/discussion/comment/706904/#Comment_706904
+        /// </summary>
+        public TelemetryValue<float> LFOdometer => new(Sdk, "LFodometer");
+        
+        /// <summary>
+        /// RF Odometer (distance of the tire, in meters)
+        /// Updates every 100m
+        /// https://forums.iracing.com/discussion/comment/706904/#Comment_706904
+        /// </summary>
+        public TelemetryValue<float> RFOdometer => new(Sdk, "RFodometer");
+        
+        /// <summary>
+        /// LR Odometer (distance of the tire, in meters)
+        /// Updates every 100m
+        /// https://forums.iracing.com/discussion/comment/706904/#Comment_706904
+        /// </summary>
+        public TelemetryValue<float> LROdometer => new(Sdk, "LRodometer");
+        
+        /// <summary>
+        /// RR Odometer (distance of the tire, in meters)
+        /// Updates every 100m
+        /// https://forums.iracing.com/discussion/comment/706904/#Comment_706904
+        /// </summary>
+        public TelemetryValue<float> RROdometer => new(Sdk, "RRodometer");
+        
         public TelemetryValue<float> LFcoldPressure => new(Sdk, "LFcoldPressure");
 
         public TelemetryValue<float> RFcoldPressure => new(Sdk, "RFcoldPressure");
@@ -855,6 +907,21 @@ namespace iRacingSdkWrapper
         /// Sun angle clockwise from north in radians
         /// </summary>
         public TelemetryValue<float> SolarAzimuth => new(Sdk, "SolarAzimuth");
+        
+        /// <summary>
+        /// Log incidents that the player recieved. Unit: irsdk_IncidentFlags
+        /// </summary>
+        public TelemetryValue<PlayerIncidents> PlayerIncidents => new(Sdk, "PlayerIncidents");
+        
+        /// <summary>
+        /// If iRacing Auto-Fuel is currently active (running)
+        /// </summary>
+        public TelemetryValue<int> DPFuelAutoFillActive => new(Sdk, "dpFuelAutoFillActive");
+        
+        /// <summary>
+        /// If iRacing Auto-Fuel is armed (enabled)
+        /// </summary>
+        public TelemetryValue<int> DPFuelAutoFillEnabled => new(Sdk, "dpFuelAutoFillEnabled");
         
     }
 }
