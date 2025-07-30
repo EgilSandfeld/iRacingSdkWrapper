@@ -5,7 +5,7 @@ namespace iRacingSdkWrapper.Bitfields
     public class PlayerIncidents : BitfieldBase<IRacingPlayerIncidents>
     {
         private uint IRSKD_INCIDENT_REP_MASK = 0x000000FF;
-        private uint IRSKD_INCIDENT_PEN_MASK = 0x0000FF00;
+        //private uint IRSKD_INCIDENT_PEN_MASK = 0x0000FF00;
 
         public PlayerIncidents(int value) : base(value)
         {
