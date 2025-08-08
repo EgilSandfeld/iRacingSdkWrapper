@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -21,7 +22,7 @@ namespace iRacingSdkWrapper
         private readonly iRacingSDK _sdk;
         private readonly SynchronizationContext _context;
 
-        private Mutex _readMutex;
+        //private Mutex _readMutex;
         private CancellationTokenSource _runCTS;
         private Action<string> _logger;
 
@@ -71,7 +72,9 @@ namespace iRacingSdkWrapper
         
         private SessionInfo _sessionInfo;
         private bool _hasConnected;
-        
+        private readonly TelemetryUpdatedEventArgs _reusableTelemetryArgs;
+        private readonly SessionInfoUpdatedEventArgs _reusableSessionInfoArgs;
+        private readonly ConcurrentQueue<Action> _eventQueue = new();
         #endregion
 
         /// <summary>
@@ -88,6 +91,9 @@ namespace iRacingSdkWrapper
             TelemetryUpdateFrequency = 60;
             ConnectSleepTime = 1000;
             _driverId = -1;
+            
+            _reusableTelemetryArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, 0, 0);
+            _reusableSessionInfoArgs = new SessionInfoUpdatedEventArgs(string.Empty, 0, 0);
 
             Replay = new ReplayControl(this);
             Camera = new CameraControl(this);
@@ -142,22 +148,22 @@ namespace iRacingSdkWrapper
                 
                 _telemetryUpdateFrequency = value;
 
-                WaitTime = UpdateWaitTime();
+                WaitTimeMs = UpdateWaitTime();
             }
         }
 
-        private static TimeSpan UpdateWaitTime()
+        private static int UpdateWaitTime()
         {
-            var waitMs = 1000f / _telemetryUpdateFrequency;
+            var waitMs = (int)Math.Floor(1000f / _telemetryUpdateFrequency);
             
-            //Subtract 0.1 ms to ensure we poll slightly faster to counter any thread delays
+            //Subtract X ms to ensure we poll slightly faster to counter any thread delays
             //This is subtracted to avoid missing serves over time, as polling always take slightly longer than just the "Thread.Sleep" part
-            waitMs -= 0.1;
+            waitMs -= 10;
             
-            return TimeSpan.FromMilliseconds(waitMs);
+            return waitMs;
         }
 
-        private TimeSpan WaitTime { get; set; } = UpdateWaitTime();
+        private int WaitTimeMs { get; set; } = UpdateWaitTime();
 
         /// <summary>
         /// The time in milliseconds between each check if iRacing is running. Use a low value (hundreds of milliseconds) to respond quickly to iRacing startup.
@@ -237,11 +243,12 @@ namespace iRacingSdkWrapper
 
             lock (_runCtLock)
             {
-                _readMutex = new Mutex(false);
+                //_readMutex = new Mutex(false);
                 _runCTS = new CancellationTokenSource();
                 _runCTSCount++;
                 _logger?.Invoke($"iRacing SDK wrapper started {_runCTSCount}");
-                Loop();
+                var loopThread = new Thread(Loop) { IsBackground = true, Name = "iRacingSdkWrapper.Loop" };
+                loopThread.Start();
             }
         }
 
@@ -340,163 +347,57 @@ namespace iRacingSdkWrapper
             _logger?.Invoke($"iRacing SDK Loop with runCT{_runCTSCount}");
             int lastUpdate = -1;
             int tries = 0;
-
+            var stopwatch = Stopwatch.StartNew();
+            //var targetFrameTicks = Stopwatch.Frequency / (TelemetryUpdateFrequency + 30);
+            
             if (_runCTS == null || _runCTS.IsCancellationRequested)
             {
                 _logger?.Invoke($"iRacing SDK Wrapper connection stopped by runCT{_runCTSCount} too early");
             }
             
-            while (_runCTS != null && !_runCTS.IsCancellationRequested)
+            while (_runCTS is { IsCancellationRequested: false })
             {
-                var hasMutex = false;
+                //var frameStart = stopwatch.ElapsedTicks;
+                // stopwatch.Restart();
+                //var hasMutex = false;
                 try
                 {
                     // Check if we can find the sim
+                    // if (_sdk?.Header?.Status == 1)
                     if (_sdk != null && _sdk.IsConnected())
-                    {
-                        if (!_isConnected)
-                        {
-                            _isConnected = true;
-
-                            // If this is the first time for the app but iRacing memory mapping file exists in memory, or a server change, restart the iRacing SDK, so we get the new server's memory mapping
-                            if (_hasConnected || _initialConnectingWithMemoryExisting)
-                            {
-                                _logger?.Invoke($"iRacing SDK Wrapper restarting runCT{_runCTSCount}");
-                                _sdk.Shutdown();
-                                _memoryFileExists = _sdk.Startup(_runCTS.Token);
-                                _initialConnectingWithMemoryExisting = false;
-                            }
-
-                            _logger?.Invoke($"iRacing SDK Wrapper connected to iRacing runCT{_runCTSCount}");
-                            RaiseEvent(OnConnectedDelegate, EventArgs.Empty);
-                        }
-
-                        _hasConnected = true;
-
-                        _readMutex.WaitOne(8);
-                        hasMutex = true;
-                        
-                        // Parse out your own driver Id
-                        var newPlayerCarIdx = -1;
-                        var newPlayerCarIdxObject = _sdk.GetData(PlayerCarIdx);
-                        if (newPlayerCarIdxObject != null)
-                            newPlayerCarIdx = (int)newPlayerCarIdxObject;
-                            
-                        if (_driverId == -1)
-                        {
-                            _driverId = newPlayerCarIdx;
-                            //_logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId}");
-                        }
-                        
-                        var tickObject = _sdk.GetData(SessionTick);
-                        var tick = -1;
-                        if (tickObject != null)
-                            tick = (int)tickObject;
-                        
-                        // Raise the TelemetryUpdated event and pass along the lap info and session time
-                        if (_telemetryInfo != null)
-                            _telemetryInfo.Sdk = _sdk;
-
-                        // Get the session time (in seconds) of this update
-                        var timeObject = _sdk.GetData(Sessiontime);
-                        var time = -1d;
-                        if (timeObject != null)
-                            time = (double)timeObject;
-                        
-                        var telemetryUpdatedEventArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time, tick);
-                        RaiseEvent(TelemetryUpdatedDelegate, telemetryUpdatedEventArgs);
-                        _latestTick = tick;
-                        _latestTime = time;
-                        
-                        // Is the session info updated?
-                        var newUpdate = _sdk.Header?.SessionInfoUpdate ?? lastUpdate;
-
-                        if (newUpdate != lastUpdate || _retrySessionInfoRetrieval)
-                        {
-                            lastUpdate = newUpdate;
-                            _retrySessionInfoRetrieval = false;
-
-                            //Force check Player Car Id again, to be sure when crossing from warm up practice -> race server practice, that the ID updates.
-                            //This is required since iRacing is not shut down inbetween session changes, thus never gets to set DriverId to -1
-                            if (_driverId != -1 && _driverId != newPlayerCarIdx)
-                            {
-                                _driverId = newPlayerCarIdx;
-                                //_logger?.Invoke($"iRacing SDK Wrapper found updated player car id {_driverId}");
-                            }
-
-                            // Get the session info string
-                            var sessionInfo = _sdk.GetSessionInfo();
-
-                            if (!string.IsNullOrEmpty(sessionInfo))
-                            {
-                                // Raise the SessionInfoUpdated event and pass along the session info and session time.
-                                var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, _latestTime, _latestTick);
-                                RaiseEvent(OnSessionInfoUpdatedDelegate, sessionArgs);
-                            }
-                            else
-                            {
-                                _retrySessionInfoRetrieval = true;
-                            }
-                        }
-                    }
-                    else if (_hasConnected && _isConnected)
-                    {
-                        _logger?.Invoke($"iRacing SDK Wrapper disconnecting from server runCT{_runCTSCount}");
-                        // We have already been initialized before, so the sim is closing
-                        RaiseEvent(OnDisconnectedDelegate, EventArgs.Empty);
-
-                        lastUpdate = -1;
-                        _isConnected = false;
-                    }
+                        ProcessConnectedState(stopwatch, ref lastUpdate);
                     else
-                    {
-                        _isConnected = false;
-                        if (!_loggedFirst)
-                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup runCT{_runCTSCount}");
-
-                        if (/*!_hasConnected && */_sdk != null)
-                            _memoryFileExists = _sdk.Startup(_runCTS.Token);
-
-                        if (_memoryFileExists
-                            && (_sdk == null || _sdk.Header == null || _sdk.Header.VarCount == 0)
-                            && (!_loggedFirstConnecting || _hasConnected))
-                        {
-                            RaiseEvent(OnConnectingDelegate, EventArgs.Empty);
-                            _memoryFileExists = false;
-                            _loggedFirstConnecting = true;
-
-                            if (!_hasConnected)
-                                _initialConnectingWithMemoryExisting = true;
-                        }
-
-                        if (!_loggedFirst)
-                            _logger?.Invoke($"iRacing SDK Wrapper SDK startup hasConnected: {_hasConnected} memoryFileExists: {_memoryFileExists}");
-
-                        _loggedFirst = true;
-                    }
+                        ProcessDisconnectedState(ref lastUpdate);
 
                     // Sleep for a short amount of time until the next update is available
-                    if (_isConnected || _sdk != null && _sdk.Header?.Status == 1)
+                    if (_isConnected || _sdk is { Header.Status: 1 })
                     {
-                        Thread.Sleep(WaitTime);
-                    }
-                    else
-                    {
-                        //_logger?.Invoke("iRacing SDK Wrapper sleeping");
-                        // Not connected yet, no need to check every 16 ms, let's try again in some time
-                        var waited = 0;
-                        const int msWait = 100;
-                        while (waited < ConnectSleepTime)
+                        var elapsedMs = stopwatch.ElapsedMilliseconds;
+                        var delay = (int)(WaitTimeMs - elapsedMs);
+                        if (delay > 0)
                         {
-                            Thread.Sleep(msWait);
-                            if (_runCTS == null || _runCTS.IsCancellationRequested)
-                            {
-                                _logger?.Invoke($"iRacing SDK Wrapper sleep breaked runCT{_runCTSCount}");
-                                break;
-                            }
-
-                            waited += msWait;
+                            if (delay < 16)
+                                Thread.Sleep(delay);
+                            else
+                                Thread.Sleep(delay);
                         }
+
+                        // var frameTime = stopwatch.ElapsedTicks - frameStart;
+                        // var sleepTicks = targetFrameTicks - frameTime;
+                        // if (sleepTicks > 0)
+                        // {
+                        //     var sleepMs = (int)Math.Floor(sleepTicks * 1000 / Stopwatch.Frequency);
+                        //     if (sleepMs >= 2)
+                        //     {
+                        //         if (sleepMs < 16)
+                        //             Thread.Sleep(sleepMs);
+                        //         else
+                        //             Thread.Sleep(sleepMs);
+                        //     }
+                        //     else
+                        //         while ((stopwatch.ElapsedTicks - frameStart) < targetFrameTicks)
+                        //             Thread.SpinWait(10);
+                        // }
                     }
                 }
                 catch (Exception ex)
@@ -517,8 +418,11 @@ namespace iRacingSdkWrapper
                 }
                 finally
                 {
-                    if (hasMutex)
-                        _readMutex.ReleaseMutex();
+                    //if (hasMutex)
+                    //    _readMutex.ReleaseMutex();
+
+                    while (_eventQueue.TryDequeue(out var action))
+                        action();
                 }
             }
 
@@ -544,6 +448,165 @@ namespace iRacingSdkWrapper
 
         }
 
+        private void ProcessConnectedState(Stopwatch stopwatch, ref int lastUpdate)
+        {
+            if (!_isConnected)
+            {
+                _isConnected = true;
+
+                // If this is the first time for the app but iRacing memory mapping file exists in memory, or a server change, restart the iRacing SDK, so we get the new server's memory mapping
+                if (_hasConnected || _initialConnectingWithMemoryExisting)
+                {
+                    _logger?.Invoke($"iRacing SDK Wrapper restarting runCT{_runCTSCount}");
+                    _sdk.Shutdown();
+                    _memoryFileExists = _sdk.Startup(_runCTS.Token);
+                    _initialConnectingWithMemoryExisting = false;
+                }
+
+                _logger?.Invoke($"iRacing SDK Wrapper connected to iRacing runCT{_runCTSCount}");
+                RaiseEvent(OnConnectedDelegate, EventArgs.Empty);
+            }
+
+            _hasConnected = true;
+
+            // Parse out your own driver Id
+            var newPlayerCarIdx = -1;
+            var newPlayerCarIdxObject = _sdk.GetData(PlayerCarIdx);
+            if (newPlayerCarIdxObject != null)
+                newPlayerCarIdx = (int)newPlayerCarIdxObject;
+                            
+            if (_driverId == -1)
+            {
+                _driverId = newPlayerCarIdx;
+                //_logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId}");
+            }
+                        
+            var tickObject = _sdk.GetData(SessionTick);
+            var tick = -1;
+            if (tickObject != null)
+                tick = (int)tickObject;
+                        
+            // Raise the TelemetryUpdated event and pass along the lap info and session time
+            if (_telemetryInfo != null)
+                _telemetryInfo.Sdk = _sdk;
+
+            // Get the session time (in seconds) of this update
+            var timeObject = _sdk.GetData(Sessiontime);
+            var time = -1d;
+            if (timeObject != null)
+                time = (double)timeObject;
+            
+            _reusableTelemetryArgs.Update(_telemetryInfo, time);
+                        
+            //var telemetryUpdatedEventArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time, tick);
+            _eventQueue.Enqueue(() => RaiseEvent(TelemetryUpdatedDelegate, _reusableTelemetryArgs));
+
+
+            if (_latestTick != tick)
+            {
+                //var timeGap = (time - _latestTime) * 1000d;
+                //var freq = (int)Math.Round(1000d / timeGap);
+                //var swElapsedMs = stopwatch.ElapsedMilliseconds;
+                //if (freq != 60)
+                //    Console.WriteLine($"iRSDK Time gap: {timeGap:F1}ms, freq: {freq:F0}Hz, swElapsedMs: {swElapsedMs}");
+                    
+                stopwatch.Restart();
+            }
+            _latestTick = tick;
+            _latestTime = time;
+                        
+            // Is the session info updated?
+            var newUpdate = _sdk.Header?.SessionInfoUpdate ?? lastUpdate;
+
+            if (newUpdate != lastUpdate || _retrySessionInfoRetrieval)
+            {
+                lastUpdate = newUpdate;
+                _retrySessionInfoRetrieval = false;
+                ProcessSessionInfoUpdate(newPlayerCarIdx, time, tick);
+            }
+        }
+
+        private void ProcessSessionInfoUpdate(int newPlayerCarIdx, double time, int tick)
+        {
+            //Force check Player Car Id again, to be sure when crossing from warm up practice -> race server practice, that the ID updates.
+            //This is required since iRacing is not shut down inbetween session changes, thus never gets to set DriverId to -1
+            if (_driverId != -1 && _driverId != newPlayerCarIdx)
+            {
+                _driverId = newPlayerCarIdx;
+                //_logger?.Invoke($"iRacing SDK Wrapper found updated player car id {_driverId}");
+            }
+
+            // Get the session info string
+            var sessionInfo = _sdk.GetSessionInfo();
+
+            if (!string.IsNullOrEmpty(sessionInfo))
+            {
+                // Raise the SessionInfoUpdated event and pass along the session info and session time.
+                _reusableSessionInfoArgs.Update(sessionInfo, time, tick);
+                //var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, _latestTime, _latestTick);
+                // RaiseEvent(OnSessionInfoUpdatedDelegate, _reusableSessionInfoArgs);
+                _eventQueue.Enqueue(() => RaiseEvent(OnSessionInfoUpdatedDelegate, _reusableSessionInfoArgs));
+            }
+            else
+            {
+                _retrySessionInfoRetrieval = true;
+            }
+        }
+
+        private void ProcessDisconnectedState(ref int lastUpdate)
+        {
+            if (_hasConnected && _isConnected)
+            {
+                _logger?.Invoke($"iRacing SDK Wrapper disconnecting from server runCT{_runCTSCount}");
+                // We have already been initialized before, so the sim is closing
+                RaiseEvent(OnDisconnectedDelegate, EventArgs.Empty);
+
+                lastUpdate = -1;
+                _isConnected = false;
+            }
+            else
+            {
+                _isConnected = false;
+                if (!_loggedFirst)
+                    _logger?.Invoke($"iRacing SDK Wrapper SDK startup runCT{_runCTSCount}");
+
+                if (/*!_hasConnected && */_sdk != null)
+                    _memoryFileExists = _sdk.Startup(_runCTS.Token);
+
+                if (_memoryFileExists
+                    && (_sdk == null || _sdk.Header == null || _sdk.Header.VarCount == 0)
+                    && (!_loggedFirstConnecting || _hasConnected))
+                {
+                    RaiseEvent(OnConnectingDelegate, EventArgs.Empty);
+                    _memoryFileExists = false;
+                    _loggedFirstConnecting = true;
+
+                    if (!_hasConnected)
+                        _initialConnectingWithMemoryExisting = true;
+                }
+
+                if (!_loggedFirst)
+                    _logger?.Invoke($"iRacing SDK Wrapper SDK startup hasConnected: {_hasConnected} memoryFileExists: {_memoryFileExists}");
+
+                _loggedFirst = true;
+            }
+            
+            //_logger?.Invoke("iRacing SDK Wrapper sleeping");
+            // Not connected yet, no need to check every 16 ms, let's try again in some time
+            var waited = 0;
+            const int msWait = 100;
+            while (waited < ConnectSleepTime)
+            {
+                Thread.Sleep(msWait);
+                if (_runCTS == null || _runCTS.IsCancellationRequested)
+                {
+                    _logger?.Invoke($"iRacing SDK Wrapper sleep breaked runCT{_runCTSCount}");
+                    break;
+                }
+
+                waited += msWait;
+            }
+        }
 
         #endregion
 
@@ -632,7 +695,7 @@ namespace iRacingSdkWrapper
             
             _logger?.Invoke("iRacing SDK wrapper Dispose runCT" + _runCTSCount);
             _runCTS.Cancel();
-            _readMutex?.Dispose();
+            //_readMutex?.Dispose();
         }
 
         #endregion
@@ -694,8 +757,15 @@ namespace iRacingSdkWrapper
             {
                 _SessionInfo = new SessionInfo(sessionInfo, time);
             }
+            
+            public void Update(string info, double time, int tick)
+            {
+                _SessionInfo = new SessionInfo(info, time);
+                UpdateTick = tick;
+                UpdateTime = time;
+            }
 
-            private readonly SessionInfo _SessionInfo;
+            private SessionInfo _SessionInfo;
             /// <summary>
             /// Gets the session info.
             /// </summary>
