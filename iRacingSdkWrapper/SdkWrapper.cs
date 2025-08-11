@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using iRacingSdkWrapper.Broadcast;
 using iRSDKSharp;
 
@@ -28,7 +29,7 @@ namespace iRacingSdkWrapper
 
         private const string PlayerCarIdx = "PlayerCarIdx";
         
-        private const string Sessiontime = "SessionTime";
+        private const string SessionTime = "SessionTime";
         
         /// <summary>
         /// SessionTick is our internal clock that we use to keep pace in the physics. This is the master clock that all copies of the sim run off of.
@@ -74,6 +75,7 @@ namespace iRacingSdkWrapper
         private bool _hasConnected;
         private readonly TelemetryUpdatedEventArgs _reusableTelemetryArgs;
         private readonly SessionInfoUpdatedEventArgs _reusableSessionInfoArgs;
+        private readonly Action _raiseTelemetryUpdatedAction;
         private readonly ConcurrentQueue<Action> _eventQueue = new();
         #endregion
 
@@ -85,14 +87,14 @@ namespace iRacingSdkWrapper
             _context = SynchronizationContext.Current;
             _sdk = new iRacingSDK();
             EventRaiseType = EventRaiseTypes.CurrentThread;
-
-            //readMutex = new Mutex(false);
+            //_readMutex = new Mutex(false);
 
             TelemetryUpdateFrequency = 60;
             ConnectSleepTime = 1000;
             _driverId = -1;
             
             _reusableTelemetryArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, 0, 0);
+            _raiseTelemetryUpdatedAction = RaiseTelemetryUpdatedFromQueue;
             _reusableSessionInfoArgs = new SessionInfoUpdatedEventArgs(string.Empty, 0, 0);
 
             Replay = new ReplayControl(this);
@@ -101,6 +103,11 @@ namespace iRacingSdkWrapper
             Chat = new ChatControl(this);
             Textures = new TextureControl(this);
             TelemetryRecording = new TelemetryRecordingControl(this);
+        }
+
+        private void RaiseTelemetryUpdatedFromQueue()
+        {
+            RaiseEvent(TelemetryUpdatedDelegate, _reusableTelemetryArgs);
         }
 
         #region Properties
@@ -160,7 +167,7 @@ namespace iRacingSdkWrapper
             //This is subtracted to avoid missing serves over time, as polling always take slightly longer than just the "Thread.Sleep" part
             waitMs -= 10;
             
-            return waitMs;
+            return waitMs > 0 ? waitMs : 0;
         }
 
         private int WaitTimeMs { get; set; } = UpdateWaitTime();
@@ -183,6 +190,7 @@ namespace iRacingSdkWrapper
         private int _runCTSCount;
         private bool _retrySessionInfoRetrieval;
         private double _latestTime;
+        private DateTime _latestRealTime;
         private int _latestTick;
 
         /// <summary>
@@ -286,14 +294,14 @@ namespace iRacingSdkWrapper
             _logger = null;
         }
 
-        /// <summary>
-        /// Return raw data object from the live telemetry.
-        /// </summary>
-        /// <param name="headerName">The name of the telemetry property to obtain.</param>
-        public object GetData(string headerName)
-        {
-            return !IsConnected ? null : _sdk.GetData(headerName);
-        }
+        // /// <summary>
+        // /// Return raw data object from the live telemetry.
+        // /// </summary>
+        // /// <param name="headerName">The name of the telemetry property to obtain.</param>
+        // public object GetData(string headerName)
+        // {
+        //     return !IsConnected ? null : _sdk.GetData(headerName);
+        // }
 
         /// <summary>
         /// Return live telemetry data wrapped in a TelemetryValue object of the specified type.
@@ -313,8 +321,8 @@ namespace iRacingSdkWrapper
             try
             {
                 var sessionInfo = _sdk.GetSessionInfo();
-                var time = (double)_sdk.GetData("SessionTime");
-                var tick = (int)_sdk.GetData("SessionTick");
+                var time = _sdk.GetValue<double>(SessionTime);
+                var tick = _sdk.GetValue<int>(SessionTick);
                 var sessionArgs = new SessionInfoUpdatedEventArgs(sessionInfo, time, tick);
                 RaiseEvent(OnSessionInfoUpdated, sessionArgs);
             }
@@ -328,27 +336,12 @@ namespace iRacingSdkWrapper
             }
         }
 
-        private object TryGetSessionNum()
-        {
-            try
-            {
-                var sessionnum = _sdk.GetData("SessionNum");
-                return sessionnum;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-        
-
         private void Loop()
         {
             _logger?.Invoke($"iRacing SDK Loop with runCT{_runCTSCount}");
             int lastUpdate = -1;
             int tries = 0;
             var stopwatch = Stopwatch.StartNew();
-            //var targetFrameTicks = Stopwatch.Frequency / (TelemetryUpdateFrequency + 30);
             
             if (_runCTS == null || _runCTS.IsCancellationRequested)
             {
@@ -357,15 +350,13 @@ namespace iRacingSdkWrapper
             
             while (_runCTS is { IsCancellationRequested: false })
             {
-                //var frameStart = stopwatch.ElapsedTicks;
-                // stopwatch.Restart();
-                //var hasMutex = false;
+                stopwatch.Restart();
                 try
                 {
                     // Check if we can find the sim
                     // if (_sdk?.Header?.Status == 1)
                     if (_sdk != null && _sdk.IsConnected())
-                        ProcessConnectedState(stopwatch, ref lastUpdate);
+                        ProcessConnectedState(ref lastUpdate);
                     else
                         ProcessDisconnectedState(ref lastUpdate);
 
@@ -374,30 +365,10 @@ namespace iRacingSdkWrapper
                     {
                         var elapsedMs = stopwatch.ElapsedMilliseconds;
                         var delay = (int)(WaitTimeMs - elapsedMs);
-                        if (delay > 0)
-                        {
-                            if (delay < 16)
-                                Thread.Sleep(delay);
-                            else
-                                Thread.Sleep(delay);
-                        }
-
-                        // var frameTime = stopwatch.ElapsedTicks - frameStart;
-                        // var sleepTicks = targetFrameTicks - frameTime;
-                        // if (sleepTicks > 0)
-                        // {
-                        //     var sleepMs = (int)Math.Floor(sleepTicks * 1000 / Stopwatch.Frequency);
-                        //     if (sleepMs >= 2)
-                        //     {
-                        //         if (sleepMs < 16)
-                        //             Thread.Sleep(sleepMs);
-                        //         else
-                        //             Thread.Sleep(sleepMs);
-                        //     }
-                        //     else
-                        //         while ((stopwatch.ElapsedTicks - frameStart) < targetFrameTicks)
-                        //             Thread.SpinWait(10);
-                        // }
+                        if (delay <= 1)
+                            delay = 1;
+                        
+                        Thread.Sleep(delay);
                     }
                 }
                 catch (Exception ex)
@@ -418,9 +389,6 @@ namespace iRacingSdkWrapper
                 }
                 finally
                 {
-                    //if (hasMutex)
-                    //    _readMutex.ReleaseMutex();
-
                     while (_eventQueue.TryDequeue(out var action))
                         action();
                 }
@@ -448,7 +416,7 @@ namespace iRacingSdkWrapper
 
         }
 
-        private void ProcessConnectedState(Stopwatch stopwatch, ref int lastUpdate)
+        private void ProcessConnectedState(ref int lastUpdate)
         {
             if (!_isConnected)
             {
@@ -470,10 +438,7 @@ namespace iRacingSdkWrapper
             _hasConnected = true;
 
             // Parse out your own driver Id
-            var newPlayerCarIdx = -1;
-            var newPlayerCarIdxObject = _sdk.GetData(PlayerCarIdx);
-            if (newPlayerCarIdxObject != null)
-                newPlayerCarIdx = (int)newPlayerCarIdxObject;
+            var newPlayerCarIdx = _sdk.GetValue<int>(PlayerCarIdx);
                             
             if (_driverId == -1)
             {
@@ -481,49 +446,47 @@ namespace iRacingSdkWrapper
                 //_logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId}");
             }
                         
-            var tickObject = _sdk.GetData(SessionTick);
-            var tick = -1;
-            if (tickObject != null)
-                tick = (int)tickObject;
+            var tick = _sdk.GetValue<int>(SessionTick);
                         
             // Raise the TelemetryUpdated event and pass along the lap info and session time
             if (_telemetryInfo != null)
                 _telemetryInfo.Sdk = _sdk;
 
             // Get the session time (in seconds) of this update
-            var timeObject = _sdk.GetData(Sessiontime);
-            var time = -1d;
-            if (timeObject != null)
-                time = (double)timeObject;
+            var time = _sdk.GetValue<double>(SessionTime);
             
             _reusableTelemetryArgs.Update(_telemetryInfo, time);
                         
             //var telemetryUpdatedEventArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time, tick);
-            _eventQueue.Enqueue(() => RaiseEvent(TelemetryUpdatedDelegate, _reusableTelemetryArgs));
-
-
-            if (_latestTick != tick)
-            {
-                //var timeGap = (time - _latestTime) * 1000d;
-                //var freq = (int)Math.Round(1000d / timeGap);
-                //var swElapsedMs = stopwatch.ElapsedMilliseconds;
-                //if (freq != 60)
-                //    Console.WriteLine($"iRSDK Time gap: {timeGap:F1}ms, freq: {freq:F0}Hz, swElapsedMs: {swElapsedMs}");
-                    
-                stopwatch.Restart();
-            }
+            _eventQueue.Enqueue(_raiseTelemetryUpdatedAction);
+            
+            //var timeGap = (time - _latestTime) * 1000d;
+            //var newTick = _latestTick != tick;
             _latestTick = tick;
             _latestTime = time;
                         
             // Is the session info updated?
             var newUpdate = _sdk.Header?.SessionInfoUpdate ?? lastUpdate;
 
-            if (newUpdate != lastUpdate || _retrySessionInfoRetrieval)
+            var updateSesInfo = newUpdate != lastUpdate || _retrySessionInfoRetrieval;
+            if (updateSesInfo)
             {
                 lastUpdate = newUpdate;
                 _retrySessionInfoRetrieval = false;
-                ProcessSessionInfoUpdate(newPlayerCarIdx, time, tick);
+                Task.Run(() => ProcessSessionInfoUpdate(newPlayerCarIdx, time, tick));
             }
+
+            // if (newTick)
+            // {
+            //     var now = DateTime.Now;
+            //     var realGap = now.Subtract(_latestRealTime).TotalMilliseconds;
+            //     _latestRealTime = now;
+            //     var freq = (int)Math.Round(1000d / timeGap);
+            //     if (freq != 60)
+            //     {
+            //         Console.WriteLine($"iRSDK tick {tick}\tSessionTime gap: {timeGap:F1}ms, freq: {freq:F0}Hz, RealTime gap: {realGap:F1}ms, updateSesInfo: {updateSesInfo}" + (newTick ? " Tick!" : string.Empty));
+            //     }
+            // }
         }
 
         private void ProcessSessionInfoUpdate(int newPlayerCarIdx, double time, int tick)

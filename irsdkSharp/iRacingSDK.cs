@@ -70,7 +70,7 @@ namespace iRSDKSharp
 
         MemoryMappedFile iRacingFile;
         MemoryMappedViewAccessor FileMapView;
-
+        private readonly Dictionary<string, object> _arrayCache = new ();
         public CiRSDKHeader Header;
         public Dictionary<string, CVarHeader> VarHeaders = new Dictionary<string, CVarHeader>();
         //List<CVarHeader> VarHeaders = new List<CVarHeader>();
@@ -207,6 +207,79 @@ namespace iRSDKSharp
                 default:
                     return null;
             }
+        }
+        
+        public T GetValue<T>(string name)
+        {
+            if (!IsInitialized || Header == null || !VarHeaders.TryGetValue(name, out var varHeader))
+            {
+                return default;
+            }
+
+            var varOffset = varHeader.Offset;
+            var count = varHeader.Count;
+            var type = typeof(T);
+
+            // Handle single value types (structs) - NO BOXING
+            if (type == typeof(int)) return (T)(object)FileMapView.ReadInt32(Header.Buffer + varOffset);
+            if (type == typeof(float)) return (T)(object)FileMapView.ReadSingle(Header.Buffer + varOffset);
+            if (type == typeof(double)) return (T)(object)FileMapView.ReadDouble(Header.Buffer + varOffset);
+            if (type == typeof(bool)) return (T)(object)FileMapView.ReadBoolean(Header.Buffer + varOffset);
+            // Add other simple types like byte, char if needed
+
+            // Handle array types - THIS WILL ALLOCATE A NEW ARRAY, which is unavoidable
+            // but it's much better than boxing every element.
+            if (type == typeof(int[]))
+            {
+                int[] data;
+                if (!_arrayCache.TryGetValue(name, out var cachedObj))
+                {
+                    data = new int[count];
+                    _arrayCache[name] = data;
+                }
+                else
+                {
+                    data = (int[])cachedObj;
+                }
+                FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                return (T)(object)data;
+            }
+            
+            if (type == typeof(float[]))
+            {
+                float[] data;
+                if (!_arrayCache.TryGetValue(name, out var cachedObj))
+                {
+                    data = new float[count];
+                    _arrayCache[name] = data;
+                }
+                else
+                {
+                    data = (float[])cachedObj;
+                }
+                FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                return (T)(object)data;
+            }
+            
+            if (type == typeof(double[]))
+            {
+                double[] data;
+                if (!_arrayCache.TryGetValue(name, out var cachedObj))
+                {
+                    data = new double[count];
+                    _arrayCache[name] = data;
+                }
+                else
+                {
+                    data = (double[])cachedObj;
+                }
+                FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                return (T)(object)data;
+            }
+
+            // Fallback for types not handled above (like string, which is special)
+            // This will still use the old boxing method if necessary.
+            return (T)GetData(name);
         }
 
         /// <summary>
