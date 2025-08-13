@@ -190,7 +190,6 @@ namespace iRacingSdkWrapper
         private int _runCTSCount;
         private bool _retrySessionInfoRetrieval;
         private double _latestTime;
-        private DateTime _latestRealTime;
         private int _latestTick;
 
         /// <summary>
