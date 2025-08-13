@@ -446,6 +446,9 @@ namespace iRacingSdkWrapper
             }
                         
             var tick = _sdk.GetValue<int>(SessionTick);
+
+            if (_latestTick == tick)
+                return;
                         
             // Raise the TelemetryUpdated event and pass along the lap info and session time
             if (_telemetryInfo != null)
