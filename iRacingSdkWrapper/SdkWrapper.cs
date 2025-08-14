@@ -447,8 +447,6 @@ namespace iRacingSdkWrapper
                         
             var tick = _sdk.GetValue<int>(SessionTick);
 
-            if (_latestTick == tick)
-                return;
                         
             // Raise the TelemetryUpdated event and pass along the lap info and session time
             if (_telemetryInfo != null)
@@ -457,16 +455,6 @@ namespace iRacingSdkWrapper
             // Get the session time (in seconds) of this update
             var time = _sdk.GetValue<double>(SessionTime);
             
-            _reusableTelemetryArgs.Update(_telemetryInfo, time);
-                        
-            //var telemetryUpdatedEventArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time, tick);
-            _eventQueue.Enqueue(_raiseTelemetryUpdatedAction);
-            
-            //var timeGap = (time - _latestTime) * 1000d;
-            //var newTick = _latestTick != tick;
-            _latestTick = tick;
-            _latestTime = time;
-                        
             // Is the session info updated?
             var newUpdate = _sdk.Header?.SessionInfoUpdate ?? lastUpdate;
 
@@ -477,6 +465,18 @@ namespace iRacingSdkWrapper
                 _retrySessionInfoRetrieval = false;
                 Task.Run(() => ProcessSessionInfoUpdate(newPlayerCarIdx, time, tick));
             }
+            
+            if (_latestTick == tick)
+                return;
+            
+            _reusableTelemetryArgs.Update(_telemetryInfo, time);
+                        
+            //var telemetryUpdatedEventArgs = new TelemetryUpdatedEventArgs(_telemetryInfo, time, tick);
+            _eventQueue.Enqueue(_raiseTelemetryUpdatedAction);
+            
+            //var timeGap = (time - _latestTime) * 1000d;
+            //var newTick = _latestTick != tick;
+            _latestTick = tick;
 
             // if (newTick)
             // {
