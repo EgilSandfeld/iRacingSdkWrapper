@@ -147,7 +147,8 @@ namespace iRSDKSharp
 
         public object GetData(string name)
         {
-            if (!IsInitialized || Header == null || name == null || !VarHeaders.ContainsKey(name)) 
+            // Fail-safe guards to avoid NullReferenceException in race conditions
+            if (!IsInitialized || Header == null || name == null || FileMapView == null || VarHeaders == null || !VarHeaders.ContainsKey(name)) 
                 return null;
 
             var varOffset = VarHeaders[name].Offset;
@@ -211,10 +212,9 @@ namespace iRSDKSharp
         
         public T GetValue<T>(string name)
         {
-            if (!IsInitialized || Header == null || !VarHeaders.TryGetValue(name, out var varHeader))
-            {
+            // Fail-safe guards to avoid NullReferenceException in race conditions
+            if (!IsInitialized || Header == null || FileMapView == null || VarHeaders == null || !VarHeaders.TryGetValue(name, out var varHeader))
                 return default;
-            }
 
             var varOffset = varHeader.Offset;
             var count = varHeader.Count;

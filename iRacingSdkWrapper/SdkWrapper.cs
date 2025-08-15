@@ -264,28 +264,39 @@ namespace iRacingSdkWrapper
         /// </summary>
         public void Stop()
         {
-            if (!IsRunning)
+            // Ensure Stop is thread-safe; prevent race with concurrent Stop/Start calls
+            lock (_runCtLock)
             {
-                _logger?.Invoke($"iRacing SDK wrapper already stopped {_runCTSCount}");
-                return;
+                if (_runCTS == null)
+                {
+                    _logger?.Invoke($"iRacing SDK wrapper already stopped {_runCTSCount}");
+                    return;
+                }
+
+                _logger?.Invoke($"iRacing SDK wrapper stopping {_runCTSCount}");
+                try
+                {
+                    _runCTS.Cancel(true);
+                    // Wait for the loop to observe cancellation; guard in case CTS is disposed elsewhere
+                    var wh = _runCTS.Token.WaitHandle;
+                    if (wh != null) WaitHandle.WaitAny(new[] { wh });
+                    _logger?.Invoke($"iRacing SDK wrapper token stopped runCT {_runCTSCount}");
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Another thread disposed the CTS; ignore
+                }
+                finally
+                {
+                    try { _runCTS.Dispose(); } catch { }
+                    _runCTS = null;
+                }
             }
 
-            _logger?.Invoke($"iRacing SDK wrapper stopping {_runCTSCount}");
-            if (_runCTS != null)
-            {
-                _runCTS.Cancel(true);
-                WaitHandle.WaitAny([_runCTS.Token.WaitHandle]);
-                _logger?.Invoke($"iRacing SDK wrapper token stopped runCT {_runCTSCount}");
-                _runCTS.Dispose();
-                _runCTS = null;
-            }
-            else
-                _logger?.Invoke("iRacing SDK wrapper stopping No RunCT");
-            
+            // Safe to shutdown SDK even if not initialized
             _sdk?.Shutdown();
-            
-            _logger?.Invoke($"iRacing SDK wrapper stopped runCT {_runCTSCount}");
 
+            _logger?.Invoke($"iRacing SDK wrapper stopped runCT {_runCTSCount}");
         }
 
         public void StopLogging()
