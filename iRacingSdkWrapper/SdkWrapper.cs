@@ -189,7 +189,6 @@ namespace iRacingSdkWrapper
         private bool _initialConnectingWithMemoryExisting;
         private int _runCTSCount;
         private bool _retrySessionInfoRetrieval;
-        private double _latestTime;
         private int _latestTick;
 
         /// <summary>
