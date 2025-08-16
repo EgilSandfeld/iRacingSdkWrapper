@@ -77,6 +77,10 @@ namespace iRacingSdkWrapper
         private readonly SessionInfoUpdatedEventArgs _reusableSessionInfoArgs;
         private readonly Action _raiseTelemetryUpdatedAction;
         private readonly ConcurrentQueue<Action> _eventQueue = new();
+        private bool _simPaused;
+        private DateTime _simPauseStartTime = DateTime.MinValue;
+        public Action<TelemetryUpdatedEventArgs, bool> SimAdapterPaused;
+        
         #endregion
 
         /// <summary>
@@ -190,6 +194,8 @@ namespace iRacingSdkWrapper
         private int _runCTSCount;
         private bool _retrySessionInfoRetrieval;
         private int _latestTick;
+        private int _firstTick = -1;
+        private int _dreTick = -1;
 
         /// <summary>
         /// Gets the Id (CarIdx) of yourself (the driver running this application).
@@ -454,9 +460,12 @@ namespace iRacingSdkWrapper
                 _driverId = newPlayerCarIdx;
                 //_logger?.Invoke($"iRacing SDK Wrapper found player car id {_driverId}");
             }
-                        
-            var tick = _sdk.GetValue<int>(SessionTick);
 
+            if (_dreTick > -1)
+                _dreTick++;
+            
+            var tick = _sdk.GetValue<int>(SessionTick);
+            var newData = _latestTick != tick;
                         
             // Raise the TelemetryUpdated event and pass along the lap info and session time
             if (_telemetryInfo != null)
@@ -475,8 +484,13 @@ namespace iRacingSdkWrapper
                 _retrySessionInfoRetrieval = false;
                 Task.Run(() => ProcessSessionInfoUpdate(newPlayerCarIdx, time, tick));
             }
+
+            UpdatePausedState(newData);
             
-            if (_latestTick == tick)
+            //Prevnet telemetry updates while sim is paused
+            //Pausing when no telemetry is available is standard in ACC, LMU as well
+            //But allow first 10 ticks through
+            if (_latestTick == tick && _dreTick - _firstTick > 10)
                 return;
             
             _reusableTelemetryArgs.Update(_telemetryInfo, time);
@@ -487,6 +501,11 @@ namespace iRacingSdkWrapper
             //var timeGap = (time - _latestTime) * 1000d;
             //var newTick = _latestTick != tick;
             _latestTick = tick;
+            if (_firstTick == -1)
+            {
+                _firstTick = tick;
+                _dreTick = tick;
+            }
 
             // if (newTick)
             // {
@@ -499,6 +518,35 @@ namespace iRacingSdkWrapper
             //         Console.WriteLine($"iRSDK tick {tick}\tSessionTime gap: {timeGap:F1}ms, freq: {freq:F0}Hz, RealTime gap: {realGap:F1}ms, updateSesInfo: {updateSesInfo}" + (newTick ? " Tick!" : string.Empty));
             //     }
             // }
+        }
+        
+        private void UpdatePausedState(bool newData)
+        {
+            if (!newData)
+            {
+                if (_simPauseStartTime == DateTime.MinValue)
+                {
+                    _simPauseStartTime = DateTime.Now;
+                    return;
+                }
+
+                if (_simPaused || _simPauseStartTime <= DateTime.MinValue || DateTime.Now.Subtract(_simPauseStartTime).TotalMilliseconds < 500)
+                    return;
+
+                _simPaused = true;
+                _simPauseStartTime = DateTime.MinValue;
+                SimAdapterPaused?.Invoke(_reusableTelemetryArgs, _simPaused);
+                return;
+            }
+
+            if (_simPaused)
+            {
+                _simPaused = false;
+                SimAdapterPaused?.Invoke(_reusableTelemetryArgs, _simPaused);
+            }
+
+            if (_simPauseStartTime > DateTime.MinValue)
+                _simPauseStartTime = DateTime.MinValue;
         }
 
         private void ProcessSessionInfoUpdate(int newPlayerCarIdx, double time, int tick)
@@ -537,11 +585,18 @@ namespace iRacingSdkWrapper
                 RaiseEvent(OnDisconnectedDelegate, EventArgs.Empty);
 
                 lastUpdate = -1;
+                _firstTick = -1;
+                _dreTick = -1;
                 _isConnected = false;
+                _simPauseStartTime = DateTime.MinValue;
             }
             else
             {
                 _isConnected = false;
+                _simPauseStartTime = DateTime.MinValue;
+                _firstTick = -1;
+                _dreTick = -1;
+                
                 if (!_loggedFirst)
                     _logger?.Invoke($"iRacing SDK Wrapper SDK startup runCT{_runCTSCount}");
 
