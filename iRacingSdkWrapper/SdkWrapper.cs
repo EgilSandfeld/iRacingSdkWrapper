@@ -491,7 +491,14 @@ namespace iRacingSdkWrapper
             //Pausing when no telemetry is available is standard in ACC, LMU as well
             //But allow first 10 ticks through
             if (_latestTick == tick && _dreTick - _firstTick > 10)
+            {
+#if DEBUG
+                if (_dreTick % 120 != 0) //Allows debugging to get one telemetry update every 2 seconds
+                    return;
+#else
                 return;
+#endif
+            }
             
             _reusableTelemetryArgs.Update(_telemetryInfo, time);
                         
