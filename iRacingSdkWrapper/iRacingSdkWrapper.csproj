@@ -47,6 +47,7 @@
     <Compile Include="Bitfields\BitfieldBase.cs" />
     <Compile Include="Bitfields\CameraState.cs" />
     <Compile Include="Bitfields\EngineWarning.cs" />
+    <Compile Include="Bitfields\PaceFlags.cs" />
     <Compile Include="Bitfields\PitServiceFlag.cs" />
     <Compile Include="Bitfields\PlayerIncidents.cs" />
     <Compile Include="Broadcast\BroadcastBase.cs" />

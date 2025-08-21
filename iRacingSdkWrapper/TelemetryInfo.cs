@@ -891,12 +891,12 @@ namespace iRacingSdkWrapper
         /// <summary>
         /// Pacing status flags for each car
         /// irsdk_PaceFlags:
-        /// None (?) = 0x00,
-        /// irsdk_PaceFlagsEndOfLine = 0x01,
-        /// irsdk_PaceFlagsFreePass = 0x02,
-        /// irsdk_PaceFlagsWavedAround = 0x04,
+        /// None = 0x00,
+        /// EndOfLine = 0x01,
+        /// FreePass = 0x02,
+        /// WavedAround = 0x04,
         /// </summary>
-        public TelemetryValue<int[]> CarIdxPaceFlags => new(Sdk, "CarIdxPaceFlags");
+        public TelemetryValue<IRacingPaceFlags[]> CarIdxPaceFlags => new(Sdk, "CarIdxPaceFlags");
         
         /// <summary>
         /// Sun angle above horizon in radians
