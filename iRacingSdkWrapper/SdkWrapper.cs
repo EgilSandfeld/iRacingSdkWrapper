@@ -482,7 +482,8 @@ namespace iRacingSdkWrapper
             {
                 lastUpdate = newUpdate;
                 _retrySessionInfoRetrieval = false;
-                Task.Run(() => ProcessSessionInfoUpdate(newPlayerCarIdx, time, tick));
+                Task.Run(() => ProcessSessionInfoUpdate(newPlayerCarIdx, time, tick))
+                    .ContinueWith(t => { var _ = t.Exception; }, TaskContinuationOptions.OnlyOnFaulted);
             }
 
             UpdatePausedState(newData);

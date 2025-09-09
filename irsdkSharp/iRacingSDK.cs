@@ -101,11 +101,24 @@ namespace iRSDKSharp
                 wh[0] = are;
                 Task.Run(() =>
                 {
-                    var index = WaitHandle.WaitAny(new[] { wh[0], token.WaitHandle });
-                    if (index == 1)
-                        throw new OperationCanceledException(token);
-                    
-                }, token);
+                    try
+                    {
+                        var index = WaitHandle.WaitAny(new[] { wh[0], token.WaitHandle });
+                        if (index == 1)
+                            throw new OperationCanceledException(token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Swallow expected cancellation to avoid UnobservedTaskException
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Token or handle disposed during shutdown; ignore
+                    }
+                }, token).ContinueWith(t =>
+                {
+                    var _ = t.Exception; // observe exceptions to prevent finalizer crashing
+                }, TaskContinuationOptions.OnlyOnFaulted);
 
                 Header = new CiRSDKHeader(FileMapView);
                 GetVarHeaders();
@@ -351,9 +364,16 @@ namespace iRSDKSharp
 
         public void Shutdown()
         {
-            Header = null;
-            iRacingFile?.Dispose();
-            IsInitialized = false;
+            try
+            {
+                Header = null;
+                FileMapView?.Dispose();
+                iRacingFile?.Dispose();
+            }
+            finally
+            {
+                IsInitialized = false;
+            }
         }
 
         IntPtr GetBroadcastMessageID()
