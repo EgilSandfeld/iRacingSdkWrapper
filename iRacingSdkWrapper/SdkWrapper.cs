@@ -430,6 +430,40 @@ namespace iRacingSdkWrapper
             _logger?.Invoke("iRacing SDK Wrapper connection cancelled");
 
         }
+        
+        private bool IsTelemetryReady()
+        {
+            if (_sdk == null || _sdk.Header == null) 
+                return false;
+            
+            if (_sdk.Header.VarCount <= 0 || _sdk.VarHeaders == null) 
+                return false;
+
+            return true;
+            
+            // Dont check these here yet
+            // return _sdk.VarHeaders.ContainsKey(PlayerCarIdx)
+            //        && _sdk.VarHeaders.ContainsKey(SessionTick)
+            //        && _sdk.VarHeaders.ContainsKey(SessionTime);
+        }
+
+        private bool TryGet<T>(string name, out T value)
+        {
+            value = default(T);
+            if (_sdk?.VarHeaders == null || !_sdk.VarHeaders.ContainsKey(name)) 
+                return false;
+            
+            try
+            {
+                value = _sdk.GetValue<T>(name);
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger?.Invoke($"iRacing SDK Wrapper TryGet error getting {name}: {e.Message}, stack: {e.StackTrace}");
+                return false;
+            }
+        }
 
         private void ProcessConnectedState(ref int lastUpdate)
         {
@@ -451,10 +485,15 @@ namespace iRacingSdkWrapper
             }
 
             _hasConnected = true;
+            
+            // Don’t touch GetValue until vars are ready
+            if (!IsTelemetryReady()) 
+                return;
 
             // Parse out your own driver Id
-            var newPlayerCarIdx = _sdk.GetValue<int>(PlayerCarIdx);
-                            
+            if (!TryGet<int>(PlayerCarIdx, out var newPlayerCarIdx)) 
+                return;
+            
             if (_driverId == -1)
             {
                 _driverId = newPlayerCarIdx;
@@ -464,7 +503,9 @@ namespace iRacingSdkWrapper
             if (_dreTick > -1)
                 _dreTick++;
             
-            var tick = _sdk.GetValue<int>(SessionTick);
+            if (!TryGet<int>(SessionTick, out var tick)) 
+                return;
+            
             var newData = _latestTick != tick;
                         
             // Raise the TelemetryUpdated event and pass along the lap info and session time
@@ -472,7 +513,8 @@ namespace iRacingSdkWrapper
                 _telemetryInfo.Sdk = _sdk;
 
             // Get the session time (in seconds) of this update
-            var time = _sdk.GetValue<double>(SessionTime);
+            if (!TryGet<double>(SessionTime, out var time)) 
+                return;
             
             // Is the session info updated?
             var newUpdate = _sdk.Header?.SessionInfoUpdate ?? lastUpdate;
