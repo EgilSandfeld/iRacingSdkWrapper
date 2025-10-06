@@ -133,7 +133,7 @@ namespace iRacingSdkWrapper
         {
             try
             {
-                if (!Exists)
+                if (!sdk.IsInitialized || !sdk.IsConnected() || !Exists) 
                     return;
 
                 // Check if we pre-compiled a factory for this type 'T'

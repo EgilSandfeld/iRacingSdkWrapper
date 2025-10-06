@@ -225,8 +225,14 @@ namespace iRSDKSharp
         
         public T GetValue<T>(string name)
         {
+            // Snapshot and cache values to prevent null reference exceptions later
+            var initialized = IsInitialized;
+            var header = Header;
+            var view = FileMapView;
+            var vars = VarHeaders;
+
             // Fail-safe guards to avoid NullReferenceException in race conditions
-            if (!IsInitialized || Header == null || FileMapView == null || VarHeaders == null || !VarHeaders.TryGetValue(name, out var varHeader))
+            if (!initialized || header == null || view == null || vars == null || !vars.TryGetValue(name, out var varHeader))
                 return default;
 
             var varOffset = varHeader.Offset;
@@ -366,13 +372,16 @@ namespace iRSDKSharp
         {
             try
             {
-                Header = null;
-                FileMapView?.Dispose();
-                iRacingFile?.Dispose();
-            }
-            finally
-            {
                 IsInitialized = false;
+                var view = FileMapView; FileMapView = null;
+                var file = iRacingFile; iRacingFile = null;
+                Header = null;
+                view?.Dispose();
+                file?.Dispose();
+            }
+            catch 
+            {
+                //Ignored
             }
         }
 
