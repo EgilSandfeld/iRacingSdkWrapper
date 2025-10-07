@@ -12,7 +12,35 @@ using Microsoft.Win32.SafeHandles;
 
 namespace iRSDKSharp
 {
-    public enum BroadcastMessageTypes { CamSwitchPos = 0, CamSwitchNum, CamSetState, ReplaySetPlaySpeed, ReplaySetPlayPosition, ReplaySearch, ReplaySetState, ReloadTextures, ChatCommand, PitCommand, TelemCommand };
+    public enum BroadcastMessageTypes
+    {
+        CamSwitchPos = 0,  // car position, group, camera
+        CamSwitchNum, // driver #, group, camera
+        CamSetState, // irsdk_CameraState, unused, unused 
+        ReplaySetPlaySpeed, // speed, slowMotion, unused
+        ReplaySetPlayPosition, // irsdk_RpyPosMode, Frame Number (high, low)
+        ReplaySearch, // irsdk_RpySrchMode, unused, unused
+        ReplaySetState, // irsdk_RpyStateMode, unused, unused
+        ReloadTextures, // irsdk_ReloadTexturesMode, carIdx, unused
+        ChatCommand, // irsdk_ChatCommandMode, subCommand, unused
+        PitCommand, // irsdk_PitCommandMode, parameter
+        TelemCommand, // irsdk_TelemCommandMode, unused, unused
+        FFBCommand, // irsdk_FFBCommandMode, value (float, high, low)
+        ReplaySearchSessionTime, // sessionNum, sessionTimeMS (high, low)
+        VideoCapture // irsdk_VideoCaptureMode, unused, unused
+    };
+    
+    enum irsdk_BroadcastMsg 
+    {
+        irsdk_BroadcastChatComand,		      
+        irsdk_BroadcastPitCommand,            
+        irsdk_BroadcastTelemCommand,		  
+        irsdk_BroadcastFFBCommand,		      
+        irsdk_BroadcastReplaySearchSessionTime, 
+        irsdk_BroadcastVideoCapture,          
+        irsdk_BroadcastLast                   // unused placeholder
+    };
+    
     public enum CamSwitchModeTypes { FocusAtIncident = -3, FocusAtLeader = -2, FocusAtExciting = -1, FocusAtDriver = 0 };
     public enum CameraStateTypes { None = 0x0000, IsSessionScreen = 0x0001, IsScenicActive = 0x0002, CamToolActive = 0x0004, UIHidden = 0x0008, UseAutoShotSelection = 0x0010, UseTemporaryEdits = 0x0020, UseKeyAcceleration = 0x0040, UseKey10xAcceleration = 0x0080, UseMouseAimMode = 0x0100 };
     public enum ReplayPositionModeTypes { Begin = 0, Current, End };
