@@ -268,10 +268,10 @@ namespace iRSDKSharp
             var type = typeof(T);
 
             // Handle single value types (structs) - NO BOXING
-            if (type == typeof(int)) return (T)(object)FileMapView.ReadInt32(Header.Buffer + varOffset);
-            if (type == typeof(float)) return (T)(object)FileMapView.ReadSingle(Header.Buffer + varOffset);
-            if (type == typeof(double)) return (T)(object)FileMapView.ReadDouble(Header.Buffer + varOffset);
-            if (type == typeof(bool)) return (T)(object)FileMapView.ReadBoolean(Header.Buffer + varOffset);
+            if (type == typeof(int)) return (T)(object)view.ReadInt32(header.Buffer + varOffset);
+            if (type == typeof(float)) return (T)(object)view.ReadSingle(header.Buffer + varOffset);
+            if (type == typeof(double)) return (T)(object)view.ReadDouble(header.Buffer + varOffset);
+            if (type == typeof(bool)) return (T)(object)view.ReadBoolean(header.Buffer + varOffset);
             // Add other simple types like byte, char if needed
 
             // Handle array types - THIS WILL ALLOCATE A NEW ARRAY, which is unavoidable
@@ -288,7 +288,7 @@ namespace iRSDKSharp
                 {
                     data = (int[])cachedObj;
                 }
-                FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                view.ReadArray(header.Buffer + varOffset, data, 0, count);
                 return (T)(object)data;
             }
             
@@ -304,7 +304,7 @@ namespace iRSDKSharp
                 {
                     data = (float[])cachedObj;
                 }
-                FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                view.ReadArray(header.Buffer + varOffset, data, 0, count);
                 return (T)(object)data;
             }
             
@@ -320,7 +320,7 @@ namespace iRSDKSharp
                 {
                     data = (double[])cachedObj;
                 }
-                FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                view.ReadArray(header.Buffer + varOffset, data, 0, count);
                 return (T)(object)data;
             }
 
