@@ -390,8 +390,15 @@ namespace iRSDKSharp
 
         public bool IsConnected()
         {
-            if (IsInitialized && Header != null)
-                return (Header.Status & 1) > 0;
+            try
+            {
+                if (IsInitialized && Header != null)
+                    return (Header.Status & 1) > 0;
+            }
+            catch (ObjectDisposedException)
+            {
+                //Ignored
+            }
             
             return false;
         }
