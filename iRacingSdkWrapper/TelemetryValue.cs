@@ -83,8 +83,7 @@ namespace iRacingSdkWrapper
             }
         }
         
-        public TelemetryValue(iRSDKSharp.iRacingSDK sdk, string name)
-            : base(sdk, name)
+        public TelemetryValue(iRSDKSharp.iRacingSDK sdk, string name) : base(sdk, name)
         {
             RefreshValue(sdk);
         }
@@ -128,7 +127,7 @@ namespace iRacingSdkWrapper
         {
             return string.Format("{0} {1}", this.Value, this.Unit);
         }
-
+        
         public void RefreshValue(iRacingSDK sdk)
         {
             try
@@ -140,15 +139,34 @@ namespace iRacingSdkWrapper
                 if (_useBitFieldFactory)
                 {
                     // This is a bitfield type. Get the raw int value (no boxing).
-                    var rawValue = sdk.GetValue<int>(this.Name);
-                    // Use the FAST, pre-compiled factory to create the object. No reflection!
-                    _Value = _bitfieldFactory(rawValue);
+                    try
+                    {
+                        var rawValue = sdk.GetValue<int>(this.Name);
+                        // Use the FAST, pre-compiled factory to create the object. No reflection!
+                        var newValue = _bitfieldFactory(rawValue);
+                        _Value = newValue;
+                    }
+                    catch (NullReferenceException)
+                    {
+                        // iRacing SDK may temporarily return null if the shared memory changes between reads
+                        // Treat as transient and skip this update cycle
+                    }
+                    
+                    return;
                 }
-                else
+
+                // This is a normal type (int, float, etc.)
+                // This is a direct cast from the generic method. NO BOXING.
+                try
                 {
-                    // This is a normal type (int, float, etc.)
-                    // This is a direct cast from the generic method. NO BOXING.
-                    _Value = sdk.GetValue<T>(this.Name);
+                    var newValue = sdk.GetValue<T>(this.Name);
+                    // If SDK returned null (reference types/arrays), skip update to avoid mapping failures
+                    if ((object)newValue == null) return;
+                    _Value = newValue;
+                }
+                catch (NullReferenceException)
+                {
+                    // Transient null from SDK – ignore and keep last good value
                 }
             }
             catch (Exception ex)
@@ -157,5 +175,109 @@ namespace iRacingSdkWrapper
                 throw;
             }
         }
+        
+        // /// <summary>
+        // /// 
+        // /// </summary>
+        // /// <param name="sdk"></param>
+        // /// <returns>TRUE when the value was updated (changed), FALSE when the value was equal to the existing</returns>
+        // public bool TryRefreshValue(iRacingSDK sdk)
+        // {
+        //     try
+        //     {
+        //         if (!sdk.IsInitialized || !sdk.IsConnected() || !Exists) 
+        //             return false;
+        //
+        //         // Check if we pre-compiled a factory for this type 'T'
+        //         if (_useBitFieldFactory)
+        //         {
+        //             // This is a bitfield type. Get the raw int value (no boxing).
+        //             try
+        //             {
+        //                 var rawValue = sdk.GetValue<int>(this.Name);
+        //                 // Use the FAST, pre-compiled factory to create the object. No reflection!
+        //                 var newValue = _bitfieldFactory(rawValue);
+        //                 var changed = !Equals(_Value, newValue);
+        //                 if (changed)
+        //                 {
+        //                     //Changed
+        //                 }
+        //                 _Value = newValue;
+        //                 return changed;
+        //             }
+        //             catch (NullReferenceException)
+        //             {
+        //                 // Transient SDK null – report no change
+        //                 return false;
+        //             }
+        //         }
+        //         else
+        //         {
+        //             // This is a normal type (int, float, etc.)
+        //             // Can be arrays int[], float[], etc. 
+        //             // This is a direct cast from the generic method. NO BOXING.
+        //             T newValue;
+        //             try
+        //             {
+        //                 newValue = sdk.GetValue<T>(this.Name);
+        //                 if ((object)newValue == null) return false;
+        //             }
+        //             catch (NullReferenceException)
+        //             {
+        //                 // Transient SDK null – report no change
+        //                 return false;
+        //             }
+        //
+        //             // Optimized comparison for array types to avoid reference equality checks
+        //             var changed = false;
+        //             var type = typeof(T);
+        //
+        //             if (type.IsArray)
+        //             {
+        //                 // Compare lengths and elements without boxing
+        //                 // Handle primitives and structs generically via Array APIs
+        //                 var oldArr = _Value as Array;
+        //                 var newArr = newValue as Array;
+        //
+        //                 if (!ReferenceEquals(oldArr, newArr))
+        //                 {
+        //                     if (oldArr == null || newArr == null)
+        //                         changed = true;
+        //                     else if (oldArr.Length != newArr.Length)
+        //                         changed = true;
+        //                     else
+        //                     {
+        //                         // element-wise compare
+        //                         for (var i = 0; i < newArr.Length; i++)
+        //                         {
+        //                             var ov = oldArr.GetValue(i);
+        //                             var nv = newArr.GetValue(i);
+        //                             if (!Equals(ov, nv))
+        //                             {
+        //                                 changed = true;
+        //                                 break;
+        //                             }
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //             else
+        //                 changed = !Equals(_Value, newValue);
+        //
+        //             
+        //             if (changed)
+        //             {
+        //                 //Changed
+        //             }
+        //             _Value = newValue;
+        //             return changed;
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         ex.Data.Add("Name", Name);
+        //         throw;
+        //     }
+        // }
     }
 }
