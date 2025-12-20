@@ -188,145 +188,161 @@ namespace iRSDKSharp
 
         public object GetData(string name)
         {
-            // Fail-safe guards to avoid NullReferenceException in race conditions
-            if (!IsInitialized || Header == null || name == null || FileMapView == null || VarHeaders == null || !VarHeaders.ContainsKey(name)) 
-                return null;
-
-            var varOffset = VarHeaders[name].Offset;
-            var count = VarHeaders[name].Count;
-            switch (VarHeaders[name].Type)
+            try
             {
-                case CVarHeader.VarType.irChar:
+                // Fail-safe guards to avoid NullReferenceException in race conditions
+                if (!IsInitialized || Header == null || name == null || FileMapView == null || VarHeaders == null || !VarHeaders.ContainsKey(name)) 
+                    return null;
+
+                var varOffset = VarHeaders[name].Offset;
+                var count = VarHeaders[name].Count;
+                switch (VarHeaders[name].Type)
                 {
-                    var data = new byte[count];
-                    FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
-                    return encoder.GetString(data).TrimEnd(['\0']);
-                }
-                
-                case CVarHeader.VarType.irBool when count > 1 && !Is360HzTo60HzDataCollection(count):
-                {
-                    var data = new bool[count];
-                    FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
-                    return data;
-                }
-                
-                case CVarHeader.VarType.irBool:
-                    return FileMapView.ReadBoolean(Header.Buffer + varOffset);
-                
-                case CVarHeader.VarType.irInt:
-                case CVarHeader.VarType.irBitField:
-                {
-                    if (count > 1 && !Is360HzTo60HzDataCollection(count))
+                    case CVarHeader.VarType.irChar:
                     {
-                        var data = new int[count];
+                        var data = new byte[count];
+                        FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                        return encoder.GetString(data).TrimEnd(['\0']);
+                    }
+                    
+                    case CVarHeader.VarType.irBool when count > 1 && !Is360HzTo60HzDataCollection(count):
+                    {
+                        var data = new bool[count];
                         FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
                         return data;
                     }
+                    
+                    case CVarHeader.VarType.irBool:
+                        return FileMapView.ReadBoolean(Header.Buffer + varOffset);
+                    
+                    case CVarHeader.VarType.irInt:
+                    case CVarHeader.VarType.irBitField:
+                    {
+                        if (count > 1 && !Is360HzTo60HzDataCollection(count))
+                        {
+                            var data = new int[count];
+                            FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                            return data;
+                        }
 
-                    return FileMapView.ReadInt32(Header.Buffer + varOffset);
+                        return FileMapView.ReadInt32(Header.Buffer + varOffset);
+                    }
+                    
+                    case CVarHeader.VarType.irFloat when count > 1 && !Is360HzTo60HzDataCollection(count):
+                    {
+                        var data = new float[count];
+                        FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                        return data;
+                    }
+                    
+                    case CVarHeader.VarType.irFloat:
+                        return FileMapView.ReadSingle(Header.Buffer + varOffset);
+                    
+                    case CVarHeader.VarType.irDouble when count > 1 && !Is360HzTo60HzDataCollection(count):
+                    {
+                        var data = new double[count];
+                        FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
+                        return data;
+                    }
+                    
+                    case CVarHeader.VarType.irDouble:
+                        return FileMapView.ReadDouble(Header.Buffer + varOffset);
+                    
+                    default:
+                        return null;
                 }
-                
-                case CVarHeader.VarType.irFloat when count > 1 && !Is360HzTo60HzDataCollection(count):
-                {
-                    var data = new float[count];
-                    FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
-                    return data;
-                }
-                
-                case CVarHeader.VarType.irFloat:
-                    return FileMapView.ReadSingle(Header.Buffer + varOffset);
-                
-                case CVarHeader.VarType.irDouble when count > 1 && !Is360HzTo60HzDataCollection(count):
-                {
-                    var data = new double[count];
-                    FileMapView.ReadArray(Header.Buffer + varOffset, data, 0, count);
-                    return data;
-                }
-                
-                case CVarHeader.VarType.irDouble:
-                    return FileMapView.ReadDouble(Header.Buffer + varOffset);
-                
-                default:
-                    return null;
+            }
+            catch (ObjectDisposedException)
+            {
+                // Shared memory accessor disposed between checks and reads; treat as transient null
+                return null;
             }
         }
         
         public T GetValue<T>(string name)
         {
-            // Snapshot and cache values to prevent null reference exceptions later
-            var initialized = IsInitialized;
-            var header = Header;
-            var view = FileMapView;
-            var vars = VarHeaders;
+            try
+            {
+                // Snapshot and cache values to prevent null reference exceptions later
+                var initialized = IsInitialized;
+                var header = Header;
+                var view = FileMapView;
+                var vars = VarHeaders;
 
-            // Fail-safe guards to avoid NullReferenceException in race conditions
-            if (!initialized || header == null || view == null || vars == null || !vars.TryGetValue(name, out var varHeader))
+                // Fail-safe guards to avoid NullReferenceException in race conditions
+                if (!initialized || header == null || view == null || vars == null || !vars.TryGetValue(name, out var varHeader))
+                    return default;
+
+                var varOffset = varHeader.Offset;
+                var count = varHeader.Count;
+                var type = typeof(T);
+
+                // Handle single value types (structs) - NO BOXING
+                if (type == typeof(int)) return (T)(object)view.ReadInt32(header.Buffer + varOffset);
+                if (type == typeof(float)) return (T)(object)view.ReadSingle(header.Buffer + varOffset);
+                if (type == typeof(double)) return (T)(object)view.ReadDouble(header.Buffer + varOffset);
+                if (type == typeof(bool)) return (T)(object)view.ReadBoolean(header.Buffer + varOffset);
+                // Add other simple types like byte, char if needed
+
+                // Handle array types - THIS WILL ALLOCATE A NEW ARRAY, which is unavoidable
+                // but it's much better than boxing every element.
+                if (type == typeof(int[]))
+                {
+                    int[] data;
+                    if (!_arrayCache.TryGetValue(name, out var cachedObj))
+                    {
+                        data = new int[count];
+                        _arrayCache[name] = data;
+                    }
+                    else
+                    {
+                        data = (int[])cachedObj;
+                    }
+                    view.ReadArray(header.Buffer + varOffset, data, 0, count);
+                    return (T)(object)data;
+                }
+                
+                if (type == typeof(float[]))
+                {
+                    float[] data;
+                    if (!_arrayCache.TryGetValue(name, out var cachedObj))
+                    {
+                        data = new float[count];
+                        _arrayCache[name] = data;
+                    }
+                    else
+                    {
+                        data = (float[])cachedObj;
+                    }
+                    view.ReadArray(header.Buffer + varOffset, data, 0, count);
+                    return (T)(object)data;
+                }
+                
+                if (type == typeof(double[]))
+                {
+                    double[] data;
+                    if (!_arrayCache.TryGetValue(name, out var cachedObj))
+                    {
+                        data = new double[count];
+                        _arrayCache[name] = data;
+                    }
+                    else
+                    {
+                        data = (double[])cachedObj;
+                    }
+                    view.ReadArray(header.Buffer + varOffset, data, 0, count);
+                    return (T)(object)data;
+                }
+
+                // Fallback for types not handled above (like string, which is special)
+                // This will still use the old boxing method if necessary.
+                return (T)GetData(name);
+            }
+            catch (ObjectDisposedException)
+            {
+                // The accessor has been disposed between read checks and actual read; treat as transient default
                 return default;
-
-            var varOffset = varHeader.Offset;
-            var count = varHeader.Count;
-            var type = typeof(T);
-
-            // Handle single value types (structs) - NO BOXING
-            if (type == typeof(int)) return (T)(object)view.ReadInt32(header.Buffer + varOffset);
-            if (type == typeof(float)) return (T)(object)view.ReadSingle(header.Buffer + varOffset);
-            if (type == typeof(double)) return (T)(object)view.ReadDouble(header.Buffer + varOffset);
-            if (type == typeof(bool)) return (T)(object)view.ReadBoolean(header.Buffer + varOffset);
-            // Add other simple types like byte, char if needed
-
-            // Handle array types - THIS WILL ALLOCATE A NEW ARRAY, which is unavoidable
-            // but it's much better than boxing every element.
-            if (type == typeof(int[]))
-            {
-                int[] data;
-                if (!_arrayCache.TryGetValue(name, out var cachedObj))
-                {
-                    data = new int[count];
-                    _arrayCache[name] = data;
-                }
-                else
-                {
-                    data = (int[])cachedObj;
-                }
-                view.ReadArray(header.Buffer + varOffset, data, 0, count);
-                return (T)(object)data;
             }
-            
-            if (type == typeof(float[]))
-            {
-                float[] data;
-                if (!_arrayCache.TryGetValue(name, out var cachedObj))
-                {
-                    data = new float[count];
-                    _arrayCache[name] = data;
-                }
-                else
-                {
-                    data = (float[])cachedObj;
-                }
-                view.ReadArray(header.Buffer + varOffset, data, 0, count);
-                return (T)(object)data;
-            }
-            
-            if (type == typeof(double[]))
-            {
-                double[] data;
-                if (!_arrayCache.TryGetValue(name, out var cachedObj))
-                {
-                    data = new double[count];
-                    _arrayCache[name] = data;
-                }
-                else
-                {
-                    data = (double[])cachedObj;
-                }
-                view.ReadArray(header.Buffer + varOffset, data, 0, count);
-                return (T)(object)data;
-            }
-
-            // Fallback for types not handled above (like string, which is special)
-            // This will still use the old boxing method if necessary.
-            return (T)GetData(name);
         }
 
         /// <summary>

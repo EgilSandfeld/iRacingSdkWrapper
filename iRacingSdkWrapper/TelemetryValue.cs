@@ -146,6 +146,10 @@ namespace iRacingSdkWrapper
                         var newValue = _bitfieldFactory(rawValue);
                         _Value = newValue;
                     }
+                    catch (ObjectDisposedException)
+                    {
+                        // Accessor disposed between checks and read; skip this cycle
+                    }
                     catch (NullReferenceException)
                     {
                         // iRacing SDK may temporarily return null if the shared memory changes between reads
@@ -163,6 +167,10 @@ namespace iRacingSdkWrapper
                     // If SDK returned null (reference types/arrays), skip update to avoid mapping failures
                     if ((object)newValue == null) return;
                     _Value = newValue;
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Accessor disposed between checks and read – ignore and keep last good value
                 }
                 catch (NullReferenceException)
                 {
