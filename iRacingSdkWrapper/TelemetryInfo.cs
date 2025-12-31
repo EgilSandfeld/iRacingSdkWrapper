@@ -470,6 +470,37 @@ namespace iRacingSdkWrapper
 
 
         /// <summary>
+        /// The RPM of the first shift light. Unit: revs/min
+        /// Note: Only exists/available in cars with dynamic shifting points up through the gears. Not available on cars with fixed shifting points
+        /// Note: Seems bugged as it shows closer to the car's real RPM than the true first shift light. Use SessionInfo's DriverCarSLFirstRPM instead
+        /// </summary>
+        public TelemetryValue<float> PlayerCarSLFirstRPM => new(Sdk, "PlayerCarSLFirstRPM");
+
+
+        /// <summary>
+        /// The RPM of the shift light to shift gear. Unit: revs/min
+        /// Note: Only exists/available in cars with dynamic shifting points up through the gears. Not available on cars with fixed shifting points
+        /// Value seems interlocked (same as) with PlayerCarSLBlinkRPM
+        /// </summary>
+        public TelemetryValue<float> PlayerCarSLShiftRPM => new(Sdk, "PlayerCarSLShiftRPM");
+
+
+        /// <summary>
+        /// The RPM of the last shift light. Unit: revs/min
+        /// Note: Only exists/available in cars with dynamic shifting points up through the gears. Not available on cars with fixed shifting points
+        /// </summary>
+        public TelemetryValue<float> PlayerCarSLLastRPM => new(Sdk, "PlayerCarSLLastRPM");
+
+
+        /// <summary>
+        /// The RPM of the blinking shift light. Unit: revs/min
+        /// Note: Only exists/available in cars with dynamic shifting points up through the gears. Not available on cars with fixed shifting points
+        /// Value seems interlocked (same as) with PlayerCarSLShiftRPM
+        /// </summary>
+        public TelemetryValue<float> PlayerCarSLBlinkRPM => new(Sdk, "PlayerCarSLBlinkRPM");
+
+
+        /// <summary>
         /// Output torque on steering shaft. Unit: N*m
         /// </summary>
         public TelemetryValue<float> SteeringWheelTorque => new(Sdk, "SteeringWheelTorque");
