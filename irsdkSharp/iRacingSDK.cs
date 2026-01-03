@@ -145,7 +145,7 @@ namespace iRSDKSharp
                     }
                 }, token).ContinueWith(t =>
                 {
-                    var _ = t.Exception; // observe exceptions to prevent finalizer crashing
+                    _ = t.Exception; // observe exceptions to prevent finalizer crashing
                 }, TaskContinuationOptions.OnlyOnFaulted);
 
                 Header = new CiRSDKHeader(FileMapView);
