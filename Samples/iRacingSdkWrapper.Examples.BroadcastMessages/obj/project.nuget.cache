@@ -1,0 +1,119 @@
+{
+  "version": 2,
+  "dgSpecHash": "6E082RYakgY=",
+  "success": false,
+  "projectFilePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+  "expectedPackageFiles": [],
+  "logs": [
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1). Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRSDKSharp is not compatible with net451 (.NETFramework,Version=v4.5.1). Project iRSDKSharp supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRSDKSharp",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1) / win. Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRSDKSharp is not compatible with net451 (.NETFramework,Version=v4.5.1) / win. Project iRSDKSharp supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRSDKSharp",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-arm64. Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-arm64"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRSDKSharp is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-arm64. Project iRSDKSharp supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRSDKSharp",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-arm64"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-x64. Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-x64"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRSDKSharp is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-x64. Project iRSDKSharp supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRSDKSharp",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-x64"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-x86. Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-x86"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRSDKSharp is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-x86. Project iRSDKSharp supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+      "libraryId": "iRSDKSharp",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-x86"
+      ]
+    }
+  ]
+}

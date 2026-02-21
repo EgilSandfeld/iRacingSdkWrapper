@@ -24,3 +24,5 @@ C:\Users\nthissen\Documents\Programming\Projects\iRacingSdkWrapper\Samples\iRaci
 F:\Users\Nick\Documents\Programming\Projects\iRacingSdkWrapper\Samples\iRacingSimulator.Examples.IncidentLog\bin\Debug\iRacingSimulator.Examples.IncidentLog.exe.config
 F:\Users\Nick\Documents\Programming\Projects\iRacingSdkWrapper\Samples\iRacingSimulator.Examples.IncidentLog\obj\Debug\iRacingSimulator.Examples.IncidentLog.exe
 F:\Users\Nick\Documents\Programming\Projects\iRacingSdkWrapper\Samples\iRacingSimulator.Examples.IncidentLog\obj\Debug\iRacingSimulator.Examples.IncidentLog.pdb
+B:\dev\Other\iRacingSdkWrapper\Samples\iRacingSimulator.Examples.IncidentLog\obj\Debug\iRacingSimulator.Examples.IncidentLog.exe
+B:\dev\Other\iRacingSdkWrapper\Samples\iRacingSimulator.Examples.IncidentLog\obj\Debug\iRacingSimulator.Examples.IncidentLog.pdb

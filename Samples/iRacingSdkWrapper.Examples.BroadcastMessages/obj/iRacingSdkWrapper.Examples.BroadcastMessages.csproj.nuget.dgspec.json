@@ -1,0 +1,195 @@
+{
+  "format": 1,
+  "restore": {
+    "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj": {}
+  },
+  "projects": {
+    "B:\\dev\\Other\\iRacingSdkWrapper\\iRacingSdkWrapper\\iRacingSdkWrapper.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "B:\\dev\\Other\\iRacingSdkWrapper\\iRacingSdkWrapper\\iRacingSdkWrapper.csproj",
+        "projectName": "iRacingSdkWrapper",
+        "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\iRacingSdkWrapper\\iRacingSdkWrapper.csproj",
+        "packagesPath": "B:\\dev\\nuget\\packages",
+        "outputPath": "B:\\dev\\Other\\iRacingSdkWrapper\\iRacingSdkWrapper\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "UsingMicrosoftNETSdk": false,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Egil\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\LocalNuGetFeed": {},
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {}
+          }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
+            "YamlDotNet": {
+              "target": "Package",
+              "version": "[9.1.4, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        }
+      }
+    },
+    "B:\\dev\\Other\\iRacingSdkWrapper\\irsdkSharp\\iRSDKSharp.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "B:\\dev\\Other\\iRacingSdkWrapper\\irsdkSharp\\iRSDKSharp.csproj",
+        "projectName": "iRSDKSharp",
+        "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\irsdkSharp\\iRSDKSharp.csproj",
+        "packagesPath": "B:\\dev\\nuget\\packages",
+        "outputPath": "B:\\dev\\Other\\iRacingSdkWrapper\\irsdkSharp\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "UsingMicrosoftNETSdk": false,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Egil\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net48"
+        ],
+        "sources": {
+          "C:\\LocalNuGetFeed": {},
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net48": {
+            "projectReferences": {}
+          }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net48": {
+          "dependencies": {
+            "System.Buffers": {
+              "target": "Package",
+              "version": "[4.6.1, )"
+            },
+            "System.Memory": {
+              "target": "Package",
+              "version": "[4.6.3, )"
+            },
+            "System.Runtime.CompilerServices.Unsafe": {
+              "target": "Package",
+              "version": "[6.1.2, )"
+            },
+            "System.Text.Encoding.CodePages": {
+              "target": "Package",
+              "version": "[10.0.1, )"
+            }
+          }
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        }
+      }
+    },
+    "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+        "projectName": "iRacingSdkWrapper.Examples.BroadcastMessages",
+        "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\iRacingSdkWrapper.Examples.BroadcastMessages.csproj",
+        "packagesPath": "B:\\dev\\nuget\\packages",
+        "outputPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSdkWrapper.Examples.BroadcastMessages\\obj\\",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "UsingMicrosoftNETSdk": false,
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Egil\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net451"
+        ],
+        "sources": {
+          "C:\\LocalNuGetFeed": {},
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net451": {
+            "projectReferences": {
+              "B:\\dev\\Other\\iRacingSdkWrapper\\iRacingSdkWrapper\\iRacingSdkWrapper.csproj": {
+                "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\iRacingSdkWrapper\\iRacingSdkWrapper.csproj"
+              },
+              "B:\\dev\\Other\\iRacingSdkWrapper\\irsdkSharp\\iRSDKSharp.csproj": {
+                "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\irsdkSharp\\iRSDKSharp.csproj"
+              }
+            }
+          }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net451": {}
+      },
+      "runtimes": {
+        "win": {
+          "#import": []
+        },
+        "win-arm64": {
+          "#import": []
+        },
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
+        }
+      }
+    }
+  }
+}

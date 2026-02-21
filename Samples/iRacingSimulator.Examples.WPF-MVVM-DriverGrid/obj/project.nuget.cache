@@ -1,0 +1,64 @@
+{
+  "version": 2,
+  "dgSpecHash": "Vq8gj0FOQuc=",
+  "success": false,
+  "projectFilePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+  "expectedPackageFiles": [],
+  "logs": [
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1). Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1) / win. Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-arm64. Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-arm64"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-x64. Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-x64"
+      ]
+    },
+    {
+      "code": "NU1201",
+      "level": "Error",
+      "message": "Project iRacingSdkWrapper is not compatible with net451 (.NETFramework,Version=v4.5.1) / win-x86. Project iRacingSdkWrapper supports: net48 (.NETFramework,Version=v4.8)",
+      "projectPath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "filePath": "B:\\dev\\Other\\iRacingSdkWrapper\\Samples\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid\\iRacingSimulator.Examples.WPF-MVVM-DriverGrid.csproj",
+      "libraryId": "iRacingSdkWrapper",
+      "targetGraphs": [
+        ".NETFramework,Version=v4.5.1/win-x86"
+      ]
+    }
+  ]
+}

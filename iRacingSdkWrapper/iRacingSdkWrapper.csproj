@@ -82,10 +82,11 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\irsdkSharp\iRSDKSharp.csproj">
-      <Project>{72631b85-eb9a-473e-9b4c-65b355a9000d}</Project>
-      <Name>iRSDKSharp</Name>
-    </ProjectReference>
+    <Reference Include="iRSDKSharp">
+      <HintPath>..\irsdkSharp\bin\x64\$(Configuration)\iRSDKSharp.dll</HintPath>
+      <Private>true</Private>
+      <SpecificVersion>false</SpecificVersion>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
