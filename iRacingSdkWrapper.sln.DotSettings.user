@@ -1,0 +1,7 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=1765e7db_002Dbee4_002D4324_002Da396_002D923d80b61ea0_0023iRacingSimulator/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=bbb48cba_002D25ac_002D4d1a_002Da2e4_002Df9ba04edf23e_0023iRacingSimulator_002EExamples_002EWinformsDriverGrid/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=b36991c5_002D2b13_002D4487_002Db42b_002Dfa1ee0a7721f_0023iRacingSimulator_002EExamples_002EWPFDriverGrid/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=34f020f4_002Df320_002D4c65_002D9ec0_002Df2939ad9d7cb_0023iRacingSimulator_002EExamples_002EWPF_002DMVVM_002DDriverGrid/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=426199fd_002D4cb6_002D4ab8_002D8b42_002D053368f49416_0023iRacingSdkWrapper_002EExamples_002EBroadcastMessages/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=991ed105_002D83e9_002D47c4_002Dbf23_002Dc4c99eacacea_0023iRacingSimulator_002EExamples_002EIncidentLog/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
