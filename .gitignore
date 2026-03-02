@@ -1,9 +1,6 @@
 /iRacingSdkWrapper.v12.suo
-/irsdkSharp/obj
-/irsdkSharp/bin
-/iRacingSdkWrapper/obj
-/iRacingSdkWrapper/bin
+# Build output directories (all projects)
+**/obj/
+**/bin/
 /iRacingSdkWrapper/iRacingSdkWrapper.v12.suo
 /iRacingSimulator/iRacingSimulator.csproj.user
-/iRacingSimulator/bin
-/iRacingSimulator/obj
