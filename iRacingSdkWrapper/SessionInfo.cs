@@ -75,6 +75,7 @@ namespace iRacingSdkWrapper
             if (string.IsNullOrEmpty(yaml))
                 return;
 
+            yaml = FixMalformedCarDesignStr(yaml);
             yaml = ApplyQuotingFixes(yaml);
             _yaml = FixMultiColons(yaml);
 
@@ -93,6 +94,13 @@ namespace iRacingSdkWrapper
             //_yaml = _yaml.Replace("AbbrevName:   ,  ", "AbbrevName: Doe, John");
             //_yaml = _yaml.Replace("AbbrevName:  ,  ", "AbbrevName: Doe, John");
             //_yaml = _yaml.Replace("AbbrevName:          ", "AbbrevName: Doe");
+        }
+
+        private static readonly Regex MalformedCarDesignStrRegex = new(@"(?m)^(\s*CarDesignStr:\s*),", RegexOptions.Compiled);
+
+        private static string FixMalformedCarDesignStr(string yaml)
+        {
+            return MalformedCarDesignStrRegex.Replace(yaml, "${1}0,");
         }
 
         private static readonly Regex SetupFuelLevelRegex = new("FuelLevel: (.*) L", RegexOptions.Compiled);
