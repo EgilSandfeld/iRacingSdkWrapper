@@ -75,6 +75,7 @@ namespace iRacingSdkWrapper
             if (string.IsNullOrEmpty(yaml))
                 return;
 
+            yaml = NormalizeDoubleQuotedScalars(yaml);
             yaml = FixMalformedCarDesignStr(yaml);
             yaml = ApplyQuotingFixes(yaml);
             _yaml = FixMultiColons(yaml);
@@ -101,6 +102,41 @@ namespace iRacingSdkWrapper
         private static string FixMalformedCarDesignStr(string yaml)
         {
             return MalformedCarDesignStrRegex.Replace(yaml, "${1}0,");
+        }
+
+        private static string NormalizeDoubleQuotedScalars(string yaml)
+        {
+            using var reader = new StringReader(yaml);
+            var builder = new StringBuilder(yaml.Length);
+
+            while (reader.ReadLine() is { } line)
+            {
+                builder.AppendLine(NormalizeDoubleQuotedScalarLine(line));
+            }
+
+            return builder.ToString();
+        }
+
+        private static string NormalizeDoubleQuotedScalarLine(string line)
+        {
+            if (string.IsNullOrEmpty(line))
+                return line;
+
+            var colonIndex = line.IndexOf(':');
+            if (colonIndex < 0 || colonIndex >= line.Length - 1)
+                return line;
+
+            var valueIndex = colonIndex + 1;
+            while (valueIndex < line.Length && (line[valueIndex] == ' ' || line[valueIndex] == '\t'))
+                valueIndex++;
+
+            if (valueIndex >= line.Length || line[valueIndex] != '"' || line[line.Length - 1] != '"')
+                return line;
+
+            var innerValue = line.Substring(valueIndex + 1, line.Length - valueIndex - 2)
+                .Replace("'", "''");
+
+            return line.Substring(0, valueIndex) + '\'' + innerValue + '\'';
         }
 
         private static readonly Regex SetupFuelLevelRegex = new("FuelLevel: (.*) L", RegexOptions.Compiled);
@@ -172,16 +208,31 @@ namespace iRacingSdkWrapper
             var builder = new StringBuilder();
             while (reader.ReadLine() is { } line)
             {
-                // Only process lines with multiple colons that don't have quotes
-                // (to avoid breaking already properly quoted values with colons)
-                if (line.Count(c => c == ':') > 1 && !line.Contains("'"))
+                if (line.Count(c => c == ':') > 1)
                 {
                     var chars = line.ToCharArray();
                     var foundFirst = false;
+                    var inSingleQuotes = false;
+                    var inDoubleQuotes = false;
                     for (var i = 0; i < chars.Length; i++)
                     {
                         var c = chars[i];
+                        if (c == '\'' && !inDoubleQuotes)
+                        {
+                            inSingleQuotes = !inSingleQuotes;
+                            continue;
+                        }
+
+                        if (c == '"' && !inSingleQuotes)
+                        {
+                            inDoubleQuotes = !inDoubleQuotes;
+                            continue;
+                        }
+
                         if (c != ':')
+                            continue;
+
+                        if (inSingleQuotes || inDoubleQuotes)
                             continue;
 
                         if (!foundFirst)
@@ -190,7 +241,9 @@ namespace iRacingSdkWrapper
                             continue;
                         }
 
-                        chars[i] = '-';
+                        var nextChar = i + 1 < chars.Length ? chars[i + 1] : '\0';
+                        if (nextChar == ' ' || nextChar == '\t')
+                            chars[i] = '-';
                     }
 
                     line = new string(chars);
@@ -248,6 +301,13 @@ namespace iRacingSdkWrapper
                             {
                                 keyTracker.Count = 0;
                                 keyTracker.AddFirstQuote = false;
+                            }
+                            else if (ch == '\'' || ch == '"')
+                            {
+                                keyTracker.Count = 0;
+                                keyTracker.AddFirstQuote = false;
+                                keyTracker.IgnoreUntilNextLine = true;
+                                keyTrackersIgnoringUntilNextLine++;
                             }
                             else if (ch != ' ')
                             {

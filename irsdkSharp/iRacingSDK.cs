@@ -92,7 +92,9 @@ namespace iRSDKSharp
         public const int VarDescOffset = 48;
         public const int VarUnitOffset = 112;
         public int VarHeaderSize = 144;
-        private Encoding encoder;
+        private readonly Encoding encoder;
+        private readonly Encoding sessionInfoUtf8Encoder;
+        private readonly Encoding sessionInfoLatin1Encoder;
 
         public bool IsInitialized = false;
 
@@ -107,6 +109,8 @@ namespace iRSDKSharp
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             encoder = Encoding.GetEncoding(1252);
+            sessionInfoUtf8Encoder = new UTF8Encoding(false, false);
+            sessionInfoLatin1Encoder = Encoding.GetEncoding(28591);
         }
 
         
@@ -382,12 +386,8 @@ namespace iRSDKSharp
                 ReadOnlySpan<byte> dataSpan = new ReadOnlySpan<byte>(rentedArray, 0, length);
 
                 int trimmedLength = TrimEndIndex(dataSpan);
-                if (trimmedLength == length)  // No trimming needed
-                    return encoder.GetString(rentedArray, 0, length);
-
-                byte[] trimmedArray = new byte[trimmedLength];
-                dataSpan.Slice(0, trimmedLength).CopyTo(trimmedArray);
-                return encoder.GetString(trimmedArray);
+                var sessionInfoEncoder = ResolveSessionInfoEncoding(rentedArray, trimmedLength);
+                return sessionInfoEncoder.GetString(rentedArray, 0, trimmedLength);
             }
             finally
             {
@@ -401,6 +401,23 @@ namespace iRSDKSharp
             while (i >= 0 && span[i] == 0)
                 i--;
             return i + 1;
+        }
+
+        private Encoding ResolveSessionInfoEncoding(byte[] data, int length)
+        {
+            if (data == null || length <= 0)
+                return encoder;
+
+            var probeLength = Math.Min(length, 512);
+            var probe = Encoding.ASCII.GetString(data, 0, probeLength);
+
+            if (probe.IndexOf("Encoding: UTF8", StringComparison.Ordinal) >= 0)
+                return sessionInfoUtf8Encoder;
+
+            if (probe.IndexOf("Encoding: ISO_8859_1", StringComparison.Ordinal) >= 0)
+                return sessionInfoLatin1Encoder;
+
+            return encoder;
         }
 
 
